@@ -1,0 +1,25 @@
+{
+  "names": ["Jesse Cole", "Eli Hart", "Tom Brennan", "Wyatt Dunn", "Clay Rowan", "Silas Reed", "Jack Mercer"],
+  "max_health": 100,
+  "start_money": 50,
+  "inventory_slots": 12,
+  "movement": {
+    "walk_speed": 180,
+    "run_multiplier": 1.7,
+    "agility_bonus": 8
+  },
+  "stat_max": 10,
+  "stat_random_points": 5,
+  "stats": {
+    "forza":      { "label": "Forza",      "base": 3 },
+    "mira":       { "label": "Mira",       "base": 3 },
+    "agilita":    { "label": "Agilità",    "base": 3 },
+    "carisma":    { "label": "Carisma",    "base": 3 },
+    "resistenza": { "label": "Resistenza", "base": 3 }
+  },
+  "start_items": [
+    { "id": "razione", "qty": 3 },
+    { "id": "borraccia", "qty": 1 },
+    { "id": "fiammiferi", "qty": 1 }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "razione": {
+    "name": "Razione",
+    "type": "cibo",
+    "description": "Carne secca e gallette. Recupera 10 salute.",
+    "value": 2,
+    "stackable": true,
+    "max_stack": 10,
+    "heal": 10
+  },
+  "bende": {
+    "name": "Bende",
+    "type": "medicina",
+    "description": "Garze pulite per fasciare le ferite. Recupera 30 salute.",
+    "value": 5,
+    "stackable": true,
+    "max_stack": 10,
+    "heal": 30
+  },
+  "whisky": {
+    "name": "Whisky",
+    "type": "bevanda",
+    "description": "Scalda e stordisce. Recupera 5 salute.",
+    "value": 4,
+    "stackable": true,
+    "max_stack": 5,
+    "heal": 5
+  },
+  "borraccia": {
+    "name": "Borraccia",
+    "type": "oggetto",
+    "description": "Borraccia di latta, indispensabile nel deserto.",
+    "value": 3,
+    "stackable": false,
+    "max_stack": 1
+  },
+  "fiammiferi": {
+    "name": "Fiammiferi",
+    "type": "oggetto",
+    "description": "Una scatola di fiammiferi di zolfo.",
+    "value": 1,
+    "stackable": true,
+    "max_stack": 20
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "time": {
+    "real_seconds_per_game_day": 600.0,
+    "start_hour": 7.0,
+    "phases": {
+      "alba":    { "from": 5.0,  "to": 7.0 },
+      "giorno":  { "from": 7.0,  "to": 17.0 },
+      "tramonto":{ "from": 17.0, "to": 20.0 }
+    },
+    "light_keyframes": [
+      { "hour": 0.0,  "color": "#1b2338" },
+      { "hour": 5.0,  "color": "#2b3350" },
+      { "hour": 6.5,  "color": "#e8a77a" },
+      { "hour": 8.0,  "color": "#ffffff" },
+      { "hour": 16.5, "color": "#ffffff" },
+      { "hour": 18.5, "color": "#e07a4a" },
+      { "hour": 20.0, "color": "#3a3558" },
+      { "hour": 22.0, "color": "#1b2338" },
+      { "hour": 24.0, "color": "#1b2338" }
+    ]
+  },
+  "world": {
+    "half_width": 3200,
+    "half_height": 2200,
+    "scenery_count": 160,
+    "scenery_clear_margin": 120
+  },
+  "town": {
+    "name_prefixes": ["Dust", "Red", "Dry", "Silver", "Coyote", "Lone", "Rattlesnake", "Black", "Iron", "Sundown"],
+    "name_suffixes": ["Creek", "Gulch", "Springs", "Junction", "Ridge", "Flats", "Hollow", "Crossing", "Bend", "Canyon"],
+    "street_length_min": 1800,
+    "street_length_max": 2600,
+    "street_width": 160,
+    "lots_per_side_min": 5,
+    "lots_per_side_max": 7,
+    "lot_width_min": 200,
+    "lot_width_max": 320,
+    "lot_depth": 220,
+    "lot_gap": 40,
+    "origin": [0, 0]
+  }
+}

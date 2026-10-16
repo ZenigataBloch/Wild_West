@@ -1,0 +1,16 @@
+78098b89c88a74ebe8c20117b8754620
+::res://::1792168513
+game_design.md::TextFile::-1::1792159133::0::1::::<><><>0<>0<><>::
+README.md::TextFile::-1::1792159248::0::1::::<><><>0<>0<><>::
+recap.md::TextFile::-1::1792168423::0::1::::<><><>0<>0<><>::
+::res://data/::1792168438
+world_config.json::JSON::-1::1792168423::0::1::::<><><>0<>0<><>::
+::res://scenes/::1792168438
+main.tscn::PackedScene::-1::1792168423::0::1::::<><><>0<>0<><>::res://scripts/world/world.gd
+::res://scripts/::1792168438
+::res://scripts/core/::1792168438
+game_time.gd::GDScript::194621812078689133::1792168423::0::1::::<>Node<><>0<>0<><>::
+world_seed.gd::GDScript::6697359608281618851::1792168423::0::1::::<>Node<><>0<>0<><>::
+::res://scripts/world/::1792168439
+town_generator.gd::GDScript::4174148087050013431::1792168423::0::1::::TownGenerator<>RefCounted<><>0<>0<><>::
+world.gd::GDScript::4905635744818091109::1792168423::0::1::::<>Node2D<><>0<>0<><>::

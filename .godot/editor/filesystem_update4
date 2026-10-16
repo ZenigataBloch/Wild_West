@@ -1,0 +1,3 @@
+res://scripts/world/world.gd
+res://scripts/player/player_state.gd
+res://scripts/ui/player_hud.gd

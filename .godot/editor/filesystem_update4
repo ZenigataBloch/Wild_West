@@ -1,8 +1,2 @@
-res://scripts/buildings/building_actions.gd
-res://scripts/dialogue/dialogue_runner.gd
+res://scripts/buildings/building_manager.gd
 res://scripts/ui/building_panel.gd
-res://scripts/ui/player_hud.gd
-res://scripts/world/world.gd
-res://scripts/ui/market_panel.gd
-res://scripts/bank/bank_system.gd
-res://scripts/ui/bank_section.gd

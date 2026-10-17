@@ -31,9 +31,16 @@ func setup(id: String, building_def: Dictionary) -> void:
 	set_title(String(def.get("name", id)))
 	custom_minimum_size = Vector2(470, 0)
 
+	var outer := VBoxContainer.new()
+	outer.add_theme_constant_override("separation", 8)
+	add_child(outer)
+	var scroll := ScrollContainer.new()
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	outer.add_child(scroll)
 	var vb := VBoxContainer.new()
 	vb.add_theme_constant_override("separation", 8)
-	add_child(vb)
+	vb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(vb)
 
 	var info := Label.new()
 	info.text = String(def.get("function", ""))
@@ -101,15 +108,26 @@ func setup(id: String, building_def: Dictionary) -> void:
 	_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_status.custom_minimum_size = Vector2(430, 0)
 	_status.add_theme_color_override("font_color", WesternTheme.color("gold"))
-	vb.add_child(_status)
+	outer.add_child(_status)
 
 	var exit_btn := Button.new()
 	exit_btn.text = "Esci  [Esc]"
 	exit_btn.pressed.connect(func(): exit_requested.emit())
-	vb.add_child(exit_btn)
+	outer.add_child(exit_btn)
 
 	_refresh()
+	# Il contenuto scorre se supera lo schermo (es. «Ricercati» in fondo); stato ed Esci restano visibili
+	var max_h := get_viewport_rect().size.y * 0.9 - 170.0
+	scroll.custom_minimum_size = Vector2(0, minf(vb.get_combined_minimum_size().y, max_h))
 	reset_size()
+	center_on_screen.call_deferred()
+
+
+func center_on_screen() -> void:
+	var vp := get_viewport_rect().size
+	reset_size()
+	position = ((vp - size) * 0.5).floor()
+	position.y = maxf(position.y, 8.0)
 
 
 func _button_text(a: Dictionary) -> String:

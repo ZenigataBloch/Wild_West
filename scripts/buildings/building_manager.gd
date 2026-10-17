@@ -79,9 +79,7 @@ func _setup_ui() -> void:
 	_panel.process_mode = Node.PROCESS_MODE_ALWAYS
 	_panel.visible = false
 	_layer.add_child(_panel)
-	_panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER, Control.PRESET_MODE_MINSIZE)
-	_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	_panel.grow_vertical = Control.GROW_DIRECTION_BOTH
+	_panel.set_anchors_preset(Control.PRESET_TOP_LEFT)   # il pannello si centra da solo (BuildingPanel.center_on_screen)
 	_panel.exit_requested.connect(func(): _panel.close())
 	_panel.closed.connect(_on_panel_closed)
 

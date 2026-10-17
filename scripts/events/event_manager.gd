@@ -26,6 +26,7 @@ var _paused_by_me: bool = false
 var _pending_ids: Array = []
 var _pending_title: String = ""
 var _pending_duel: bool = false
+var _scene: EventSceneView = null
 
 
 func _init() -> void:
@@ -150,6 +151,7 @@ func _start(ev: Dictionary) -> void:
 			enabled = false
 			tip = "Non hai abbastanza soldi."
 		_actions.append({"group": "event", "label": label, "tip": tip, "enabled": enabled, "run": func(): return _resolve(opt)})
+	_spawn_scene(ev)
 	_pause(true)
 	_panel.set_title(str(ev.get("title", "EVENTO")))
 	_panel.open_menu(str(ev.get("text", "")), "", _actions)
@@ -257,3 +259,17 @@ func _pause(on: bool) -> void:
 	elif _paused_by_me:
 		get_tree().paused = false
 		_paused_by_me = false
+
+
+# Grafica dell'evento in strada (Feature 24): resta visibile dopo la chiusura del pannello e poi svanisce.
+func _spawn_scene(ev: Dictionary) -> void:
+	var sc = ev.get("scene", null)
+	if not (sc is Dictionary) or _avatar == null:
+		return
+	if _scene != null and is_instance_valid(_scene):
+		_scene.queue_free()
+	var face: Vector2 = _avatar.get("facing") if _avatar.get("facing") is Vector2 else Vector2.DOWN
+	_scene = EventSceneView.new()
+	get_parent().add_child(_scene)
+	_scene.global_position = _avatar.global_position + face.normalized() * float(sc.get("distance", 170))
+	_scene.setup(str(sc.get("kind", "")), float(sc.get("seconds", 60)))

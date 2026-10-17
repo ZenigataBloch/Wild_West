@@ -10,11 +10,16 @@ extends Node2D
 ## Con notorietà alta i vice dello sceriffo ti inseguono e ti arrestano (Feature 21).
 ## Eventi casuali (rapina in banca, incendio, aggressione, carovana, duello, incontro misterioso): Y ne fa partire uno (Feature 22).
 ## I lotti senza edificio sono in vendita: E sul cartello per comprare terreno, casa o negozio (Feature 18).
+## F1 apre il menu con i comandi, Salva e Carica (Feature 26).
+## Se muori (salute 0) compare la schermata di morte: carica l'ultimo salvataggio o nuova partita (Feature 25).
+## F5 salva la partita, F6 carica il salvataggio più recente; autosalvataggio a ogni nuovo giorno (Feature 23).
+## Feature 27: pannello orario in stile western, terreno e strada rifiniti, luci notturne, vignettatura.
 
 const CONFIG_PATH := "res://data/world_config.json"
 const AvatarScript := preload("res://scripts/player/player_avatar.gd")
 const HudScript := preload("res://scripts/ui/player_hud.gd")
 const PromptScript := preload("res://scripts/ui/interaction_hud.gd")
+const VIGNETTE_SHADER := preload("res://shaders/screen_vignette.gdshader")
 
 var town: Dictionary = {}
 var scenery: Array = []
@@ -26,6 +31,10 @@ var _world_cfg: Dictionary = {}
 var _town_cfg: Dictionary = {}
 var _modulate: CanvasModulate
 var _info: Label
+var _info_hint: Label
+var _night: NightLights
+var _ground: Array = []   # chiazze di terra, ciuffi e sassi (solo grafica, dipendono dal seed)
+var _last_light_hour: float = -1.0
 var _town_root: Node2D
 var _buildings: BuildingManager
 var _npcs: NPCManager
@@ -41,6 +50,9 @@ var _gangs: GangManager
 var _crime: CrimeManager
 var _law: LawManager
 var _events: EventManager
+var _save: SaveManager
+var _death: DeathManager
+var _menu: GameMenu
 
 func _ready() -> void:
 	var f := FileAccess.open(CONFIG_PATH, FileAccess.READ)
@@ -57,29 +69,64 @@ func _ready() -> void:
 	add_child(avatar)
 
 	var layer := CanvasLayer.new()
+	layer.layer = 2   # sopra la vignettatura (livello 1), sotto HUD e pannelli
 	add_child(layer)
+	var info_panel := PanelContainer.new()
+	WesternTheme.apply(info_panel)
+	info_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	info_panel.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
+	info_panel.offset_left = 16
+	info_panel.offset_right = 16
+	info_panel.offset_top = -12
+	info_panel.offset_bottom = -12
+	info_panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	layer.add_child(info_panel)
+	var info_box := VBoxContainer.new()
+	info_box.add_theme_constant_override("separation", 0)
+	info_panel.add_child(info_box)
 	_info = Label.new()
-	_info.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
-	_info.offset_left = 16
-	_info.offset_top = -36
-	_info.offset_bottom = -8
-	_info.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	_info.add_theme_font_size_override("font_size", 18)
-	layer.add_child(_info)
+	info_box.add_child(_info)
+	_info_hint = Label.new()
+	_info_hint.add_theme_font_size_override("font_size", 13)
+	_info_hint.modulate = Color(1, 1, 1, 0.65)
+	info_box.add_child(_info_hint)
 
 	var hud = HudScript.new()
 	add_child(hud)
 	add_child(ReputationManager.new())
+	_save = SaveManager.new()
+	add_child(_save)
 	_prompt_hud = PromptScript.new()
 	add_child(_prompt_hud)
 
 	avatar.prompt_changed.connect(_prompt_hud.set_prompt)
+	_save.message.connect(_prompt_hud.show_message)
+	_save.load_requested.connect(load_game, CONNECT_DEFERRED)
+	_save.setup(avatar, HudScript.GAME_VERSION)
+	_menu = GameMenu.new()
+	add_child(_menu)
+	_menu.save_requested.connect(_save.save_manual)
+	_menu.load_requested.connect(_save.load_latest)
+	_death = DeathManager.new()
+	add_child(_death)
+	_death.load_requested.connect(load_game)
+	_death.new_game_requested.connect(func(): _new_game(0))
 	hud.sheet_toggled.connect(func(open: bool): avatar.input_enabled = not open)
 
-	GameTime.phase_changed.connect(func(p): print("Fase: ", p))
-	GameTime.day_changed.connect(func(d): print("Giorno ", d))
+	GameTime.minute_changed.connect(func(_h: int, _m: int): _refresh_info())
+	GameTime.phase_changed.connect(func(_p: String): _refresh_info())
+	_add_vignette()
+	_night = NightLights.new()
+	add_child(_night)
 	PlayerState.player_died.connect(func(): print("Il giocatore è morto"))
 	_new_game(0)
+
+# Carica un salvataggio: rigenera il mondo con lo stesso seed e poi riapplica lo stato (Feature 23).
+func load_game(data: Dictionary) -> void:
+	_new_game(int(data.get("seed", 0)))
+	SaveSystem.apply(data, avatar)
+	_refresh_info()
 
 func _new_game(forced_seed: int) -> void:
 	WorldSeed.new_game(forced_seed)
@@ -95,9 +142,12 @@ func _new_game(forced_seed: int) -> void:
 	var hw: float = _world_cfg["half_width"]
 	var hh: float = _world_cfg["half_height"]
 	bounds = Rect2(origin.x - hw, origin.y - hh, hw * 2.0, hh * 2.0)
+	_ground = _make_ground()
 
 	_build_town_nodes()
+	_night.setup(_buildings.buildings, avatar)
 	avatar.setup(bounds, origin)
+	_refresh_info()
 	queue_redraw()
 
 # Lotti solidi, edifici (Feature 5), NPC (Feature 6-8); i lotti ancora liberi vanno in vendita (Feature 18).
@@ -203,10 +253,25 @@ func _build_town_nodes() -> void:
 		_town_root.add_child(body)
 
 func _process(_d: float) -> void:
-	_modulate.color = GameTime.get_light_color()
-	_info.text = "%s  |  Giorno %d  %s  (%s)  |  seed %d  |  x%.0f  |  WASD muovi, Shift corri, E interagisci, L lavoro, M mercato, N bande, C malaffare" % [
-		town.get("name", "?"), GameTime.day, GameTime.get_time_string(),
-		GameTime.phase, WorldSeed.world_seed, GameTime.time_scale]
+	# Il colore ambientale cambia solo quando l'ora cambia (non mentre il tempo è fermo).
+	var h := GameTime.hour_float
+	if h != _last_light_hour:
+		_last_light_hour = h
+		_modulate.color = GameTime.get_light_color()
+
+
+# Riga informativa in basso a sinistra: si aggiorna solo quando cambia qualcosa (minuto, fase, velocità).
+func _refresh_info() -> void:
+	if _info == null:
+		return
+	var extra := ""
+	if GameTime.paused:
+		extra = "  ·  PAUSA"
+	elif GameTime.time_scale != 1.0:
+		extra = "  ·  x%.0f" % GameTime.time_scale
+	_info.text = "%s  ·  Giorno %d  ·  %s (%s)%s" % [
+		town.get("name", "?"), GameTime.day, GameTime.get_time_string(), GameTime.phase, extra]
+	_info_hint.text = "seed %d  ·  F1 menu  ·  F5 salva  ·  F6 carica" % WorldSeed.world_seed
 
 func _unhandled_key_input(e: InputEvent) -> void:
 	if not e.pressed or e.echo:
@@ -234,33 +299,139 @@ func _unhandled_key_input(e: InputEvent) -> void:
 			var wid := WeaponDB.random_id(r)
 			if wid != "" and PlayerState.add_item(wid, 1) == 0:
 				_prompt_hud.show_message("Debug: %s (%s)" % [WeaponDB.name_of(wid), WeaponDB.rarity_label(wid)])
+	_refresh_info()
 
-# Rendering segnaposto: la grafica vera arriva con la Feature 4.
+# Vignettatura a tutto schermo (livello sotto HUD e pannelli, non toccata da CanvasModulate).
+func _add_vignette() -> void:
+	var layer := CanvasLayer.new()
+	layer.layer = 1
+	add_child(layer)
+	var rect := ColorRect.new()
+	rect.set_anchors_preset(Control.PRESET_FULL_RECT)
+	rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var mat := ShaderMaterial.new()
+	mat.shader = VIGNETTE_SHADER
+	mat.set_shader_parameter("strength", float(WesternTheme.config()["shader"]["vignette"]) + 0.1)
+	rect.material = mat
+	layer.add_child(rect)
+
+
+# Chiazze di terra chiara/scura, ciuffi d'erba secca e sassi sulla strada. Canale proprio del seed:
+# non altera città e scenario già generati.
+func _make_ground() -> Array:
+	var rng := WorldSeed.rng_for("ground")
+	var items: Array = []
+	var area := bounds.grow(-40.0)
+	for i in 200:
+		items.append({
+			"kind": "chiazza",
+			"pos": Vector2(rng.randf_range(area.position.x, area.end.x), rng.randf_range(area.position.y, area.end.y)),
+			"r": rng.randf_range(40.0, 150.0),
+			"light": rng.randf() < 0.5,
+		})
+	for i in 300:
+		items.append({
+			"kind": "ciuffo",
+			"pos": Vector2(rng.randf_range(area.position.x, area.end.x), rng.randf_range(area.position.y, area.end.y)),
+			"k": rng.randf_range(0.7, 1.3),
+		})
+	var s: Array = town["street"]
+	for i in 90:
+		items.append({
+			"kind": "sasso",
+			"pos": Vector2(rng.randf_range(s[0], s[0] + s[2]), rng.randf_range(s[1] + 6.0, s[1] + s[3] - 6.0)),
+			"r": rng.randf_range(1.5, 3.5),
+		})
+	return items
+
+
+# Grafica del mondo disegnata da codice (sostituibile con sprite): terreno, strada, lotti e scenario.
 func _draw() -> void:
 	if town.is_empty():
 		return
 	draw_rect(bounds.grow(1500.0), Color("#c9a66b"))                      # terreno
+	_draw_ground()
 	draw_rect(bounds, Color("#3b2614"), false, 8.0)                       # limite dell'area
 	var s: Array = town["street"]
-	draw_rect(Rect2(s[0], s[1], s[2], s[3]), Color("#9c7a4a"))            # strada principale
+	var street := Rect2(s[0], s[1], s[2], s[3])
+	draw_rect(street, Color("#9c7a4a"))                                   # strada principale
+	_draw_street_details(street)
 	for lot in town["lots"]:
 		var r: Array = lot["rect"]
 		draw_rect(Rect2(r[0], r[1], r[2], r[3]), Color("#6b4a2b"))
 		draw_rect(Rect2(r[0], r[1], r[2], r[3]), Color("#3b2614"), false, 4.0)
 	for prop in scenery:
-		var p := Vector2(prop["pos"][0], prop["pos"][1])
-		var k: float = prop["size"]
-		match prop["type"]:
-			"cactus":
-				var g := Color("#3f7a3a")
-				draw_rect(Rect2(p.x - 5 * k, p.y - 34 * k, 10 * k, 34 * k), g)
-				draw_rect(Rect2(p.x - 16 * k, p.y - 24 * k, 12 * k, 5 * k), g)
-				draw_rect(Rect2(p.x - 16 * k, p.y - 34 * k, 5 * k, 15 * k), g)
-				draw_rect(Rect2(p.x + 4 * k, p.y - 18 * k, 12 * k, 5 * k), g)
-				draw_rect(Rect2(p.x + 11 * k, p.y - 28 * k, 5 * k, 15 * k), g)
-			"roccia":
-				draw_circle(p, 14 * k, Color("#7d746a"))
-				draw_circle(p + Vector2(-3, -3) * k, 8 * k, Color("#9a9086"))
-			"cespuglio":
-				draw_circle(p, 10 * k, Color("#8a7a45"))
-				draw_circle(p + Vector2(6, 2) * k, 7 * k, Color("#7a6a3a"))
+		_draw_prop(prop)
+
+
+func _draw_ground() -> void:
+	var light := Color(0.93, 0.80, 0.55, 0.22)
+	var dark := Color(0.62, 0.46, 0.27, 0.20)
+	var tuft := Color("#8d7a3c")
+	for g in _ground:
+		var p: Vector2 = g["pos"]
+		match g["kind"]:
+			"chiazza":
+				draw_set_transform(p, 0.0, Vector2(1.0, 0.45))
+				draw_circle(Vector2.ZERO, float(g["r"]), light if g["light"] else dark)
+			"ciuffo":
+				var k: float = g["k"]
+				draw_set_transform(p, 0.0, Vector2.ONE)
+				draw_line(Vector2.ZERO, Vector2(-4, -9) * k, tuft, 1.5)
+				draw_line(Vector2.ZERO, Vector2(0, -12) * k, tuft, 1.5)
+				draw_line(Vector2.ZERO, Vector2(4, -9) * k, tuft, 1.5)
+			"sasso":
+				draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+				draw_circle(p, float(g["r"]), Color(0.40, 0.30, 0.20, 0.5))
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+
+# Marciapiedi di legno negli 10 px liberi tra strada e lotti, bordi e solchi delle ruote.
+func _draw_street_details(street: Rect2) -> void:
+	var wood := Color("#7a5632")
+	var plank := Color(0, 0, 0, 0.28)
+	for sy in [street.position.y - 10.0, street.end.y]:
+		var y: float = sy
+		draw_rect(Rect2(street.position.x, y, street.size.x, 10.0), wood)
+		var x := street.position.x
+		while x < street.end.x:
+			draw_line(Vector2(x, y), Vector2(x, y + 10.0), plank, 1.0)
+			x += 22.0
+	var edge := Color("#6e5230")
+	draw_line(street.position, Vector2(street.end.x, street.position.y), edge, 3.0)
+	draw_line(Vector2(street.position.x, street.end.y), street.end, edge, 3.0)
+	var rut := Color(0.45, 0.32, 0.18, 0.55)
+	for fy in [0.36, 0.64]:
+		var ry: float = street.position.y + street.size.y * float(fy)
+		draw_dashed_line(Vector2(street.position.x + 20.0, ry), Vector2(street.end.x - 20.0, ry), rut, 3.0, 26.0)
+
+
+func _draw_prop(prop: Dictionary) -> void:
+	var p := Vector2(prop["pos"][0], prop["pos"][1])
+	var k: float = prop["size"]
+	match prop["type"]:
+		"cactus":
+			var g := Color("#3f7a3a")
+			draw_set_transform(p + Vector2(4, 1) * k, 0.0, Vector2(1.0, 0.35))
+			draw_circle(Vector2.ZERO, 16 * k, Color(0, 0, 0, 0.22))
+			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+			draw_rect(Rect2(p.x - 5 * k, p.y - 34 * k, 10 * k, 34 * k), g)
+			draw_rect(Rect2(p.x - 16 * k, p.y - 24 * k, 12 * k, 5 * k), g)
+			draw_rect(Rect2(p.x - 16 * k, p.y - 34 * k, 5 * k, 15 * k), g)
+			draw_rect(Rect2(p.x + 4 * k, p.y - 18 * k, 12 * k, 5 * k), g)
+			draw_rect(Rect2(p.x + 11 * k, p.y - 28 * k, 5 * k, 15 * k), g)
+			draw_rect(Rect2(p.x - 5 * k, p.y - 34 * k, 3 * k, 34 * k), Color("#58a04c"))   # lato illuminato
+		"roccia":
+			draw_set_transform(p + Vector2(3, 8) * k, 0.0, Vector2(1.0, 0.35))
+			draw_circle(Vector2.ZERO, 16 * k, Color(0, 0, 0, 0.22))
+			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+			draw_circle(p, 14 * k, Color("#7d746a"))
+			draw_circle(p + Vector2(-3, -3) * k, 8 * k, Color("#9a9086"))
+			draw_circle(p + Vector2(-5, -6) * k, 3 * k, Color("#b8afa4"))
+		"cespuglio":
+			draw_set_transform(p + Vector2(2, 7) * k, 0.0, Vector2(1.0, 0.35))
+			draw_circle(Vector2.ZERO, 13 * k, Color(0, 0, 0, 0.2))
+			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+			draw_circle(p, 10 * k, Color("#8a7a45"))
+			draw_circle(p + Vector2(6, 2) * k, 7 * k, Color("#7a6a3a"))
+			draw_circle(p + Vector2(-3, -3) * k, 4 * k, Color("#a3924f"))

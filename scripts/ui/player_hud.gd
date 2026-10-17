@@ -1,6 +1,6 @@
 extends CanvasLayer
 ## HUD del giocatore (nome, salute, soldi) e scheda personaggio (statistiche + inventario).
-## Aspetto provvisorio con nodi Control standard: lo stile western arriva con la Feature 4.
+## Stile western (WesternTheme): barra della salute a fasce di colore, icone, animazioni su danno e soldi (Feature 27).
 ## Tasto I = apri/chiudi scheda, Esc = chiudi. Doppio click su un oggetto = usalo
 ## (cibo/medicine) oppure equipaggialo (armi, Feature 12; doppio click sull'arma in mano = la riponi).
 
@@ -8,6 +8,11 @@ signal sheet_toggled(open: bool)
 
 var _name_label: Label
 var _hp_bar: ProgressBar
+var _hp_fill: StyleBoxFlat
+var _heart_icon: WesternIcon
+var _pulse_tween: Tween
+var _last_health: int = -1
+var _last_money: int = -1
 var _hp_label: Label
 var _money_label: Label
 var _weapon_label: Label
@@ -52,7 +57,12 @@ func _ready() -> void:
 	_refresh_debt()
 	_refresh_property()
 
-const GAME_VERSION := "Feature 22"
+const GAME_VERSION := "Feature 27"
+
+# Colori della barra della salute: sana, ferita, grave.
+const HP_OK := Color(0.35, 0.48, 0.18)
+const HP_MID := Color(0.79, 0.56, 0.12)
+const HP_LOW := Color(0.70, 0.15, 0.12)
 
 func _build_version_label() -> void:
 	var v := Label.new()
@@ -70,28 +80,49 @@ func _build_version_label() -> void:
 
 func _build_hud() -> void:
 	var panel := PanelContainer.new()
+	WesternTheme.apply(panel)
 	panel.position = Vector2(16, 12)
 	add_child(panel)
 	var box := VBoxContainer.new()
 	box.custom_minimum_size = Vector2(240, 0)
+	box.add_theme_constant_override("separation", 3)
 	panel.add_child(box)
 
 	_name_label = Label.new()
-	_name_label.add_theme_font_size_override("font_size", 20)
+	_name_label.theme_type_variation = &"TitleLabel"
+	_name_label.add_theme_font_size_override("font_size", 22)
 	box.add_child(_name_label)
 
+	var hp_row := HBoxContainer.new()
+	hp_row.add_theme_constant_override("separation", 6)
+	box.add_child(hp_row)
+	_heart_icon = WesternIcon.new()
+	_heart_icon.kind = WesternIcon.Kind.HEART
+	_heart_icon.icon_size = 24.0
+	hp_row.add_child(_heart_icon)
 	_hp_bar = ProgressBar.new()
 	_hp_bar.show_percentage = false
-	_hp_bar.custom_minimum_size = Vector2(0, 18)
-	var fill := StyleBoxFlat.new()
-	fill.bg_color = Color("#b3261e")
-	_hp_bar.add_theme_stylebox_override("fill", fill)
-	box.add_child(_hp_bar)
+	_hp_bar.custom_minimum_size = Vector2(0, 20)
+	_hp_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_hp_bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	_hp_fill = StyleBoxFlat.new()
+	_hp_fill.bg_color = HP_OK
+	_hp_fill.set_corner_radius_all(3)
+	_hp_bar.add_theme_stylebox_override("fill", _hp_fill)
+	hp_row.add_child(_hp_bar)
 
 	_hp_label = Label.new()
 	box.add_child(_hp_label)
+
+	var money_row := HBoxContainer.new()
+	money_row.add_theme_constant_override("separation", 6)
+	box.add_child(money_row)
+	var coin := WesternIcon.new()
+	coin.kind = WesternIcon.Kind.COIN
+	coin.icon_size = 22.0
+	money_row.add_child(coin)
 	_money_label = Label.new()
-	box.add_child(_money_label)
+	money_row.add_child(_money_label)
 	_weapon_label = Label.new()
 	box.add_child(_weapon_label)
 	_wound_label = Label.new()
@@ -114,6 +145,7 @@ func _build_sheet() -> void:
 	add_child(_sheet)
 
 	var panel := PanelContainer.new()
+	WesternTheme.apply(panel)
 	panel.custom_minimum_size = Vector2(520, 0)
 	_sheet.add_child(panel)
 	var margin := MarginContainer.new()
@@ -125,6 +157,7 @@ func _build_sheet() -> void:
 	margin.add_child(box)
 
 	_sheet_title = Label.new()
+	_sheet_title.theme_type_variation = &"TitleLabel"
 	_sheet_title.add_theme_font_size_override("font_size", 24)
 	box.add_child(_sheet_title)
 	box.add_child(HSeparator.new())
@@ -193,6 +226,41 @@ func _refresh_hud() -> void:
 	_hp_label.text = "Salute %d / %d" % [PlayerState.health, PlayerState.max_health]
 	_money_label.text = "$ %d" % PlayerState.money
 	_sheet_title.text = PlayerState.player_name
+	var ratio := float(PlayerState.health) / maxf(1.0, float(PlayerState.max_health))
+	_hp_fill.bg_color = HP_OK if ratio > 0.6 else (HP_MID if ratio > 0.3 else HP_LOW)
+	_set_low_health_pulse(ratio <= 0.25 and PlayerState.health > 0)
+	if _last_health >= 0 and PlayerState.health < _last_health:
+		_flash(_hp_bar, Color(1.0, 0.4, 0.3))
+	if _last_money >= 0 and PlayerState.money != _last_money:
+		_pop(_money_label)
+	_last_health = int(PlayerState.health)
+	_last_money = int(PlayerState.money)
+
+# Il cuore pulsa finché la salute è molto bassa.
+func _set_low_health_pulse(on: bool) -> void:
+	var running := _pulse_tween != null and _pulse_tween.is_valid()
+	if on == running:
+		return
+	if _pulse_tween != null:
+		_pulse_tween.kill()
+		_pulse_tween = null
+	_heart_icon.modulate = Color.WHITE
+	if on:
+		_pulse_tween = create_tween().set_loops()
+		_pulse_tween.tween_property(_heart_icon, "modulate", Color(1.0, 0.45, 0.4), 0.45)
+		_pulse_tween.tween_property(_heart_icon, "modulate", Color.WHITE, 0.45)
+
+# Animazioni brevi che girano anche a gioco in pausa (i pannelli mettono in pausa l'albero).
+func _flash(node: CanvasItem, color: Color) -> void:
+	node.modulate = color
+	var tw := create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	tw.tween_property(node, "modulate", Color.WHITE, 0.35)
+
+func _pop(node: Control) -> void:
+	node.pivot_offset = node.size * 0.5
+	var tw := create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	tw.tween_property(node, "scale", Vector2.ONE * 1.2, 0.07)
+	tw.tween_property(node, "scale", Vector2.ONE, 0.12)
 
 func _refresh_stats() -> void:
 	for c in _stats_box.get_children():

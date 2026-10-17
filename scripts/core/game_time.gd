@@ -23,6 +23,8 @@ var _real_seconds_per_day: float = 600.0
 var _start_hour: float = 7.0
 var _phases: Dictionary = {}
 var _keyframes: Array = []
+var _key_hours: PackedFloat32Array = PackedFloat32Array()   # copie già convertite dei keyframe (luce)
+var _key_colors: Array[Color] = []
 var _last_minute: int = -1
 var _last_hour: int = -1
 
@@ -33,6 +35,11 @@ func _ready() -> void:
 	_start_hour = t.get("start_hour", 7.0)
 	_phases = t.get("phases", {})
 	_keyframes = t.get("light_keyframes", [])
+	_key_hours = PackedFloat32Array()
+	_key_colors.clear()
+	for k in _keyframes:
+		_key_hours.append(float(k["hour"]))
+		_key_colors.append(Color(String(k["color"])))
 	reset()
 
 func reset() -> void:
@@ -81,17 +88,18 @@ func get_time_string() -> String:
 	return "%02d:%02d" % [int(hour_float), int((hour_float - int(hour_float)) * 60.0)]
 
 
-## Colore ambientale per CanvasModulate (interpolato tra i keyframe).
+## Colore ambientale per CanvasModulate (interpolato tra i keyframe già convertiti in _ready).
 func get_light_color() -> Color:
-	if _keyframes.size() < 2:
+	var n := _key_colors.size()
+	if n < 2:
 		return Color.WHITE
-	for i in range(_keyframes.size() - 1):
-		var a: Dictionary = _keyframes[i]
-		var b: Dictionary = _keyframes[i + 1]
-		if hour_float >= a["hour"] and hour_float <= b["hour"]:
-			var span: float = b["hour"] - a["hour"]
-			var k: float = 0.0 if span <= 0.0 else (hour_float - a["hour"]) / span
-			return Color(a["color"]).lerp(Color(b["color"]), k)
+	for i in range(n - 1):
+		var h0 := _key_hours[i]
+		var h1 := _key_hours[i + 1]
+		if hour_float >= h0 and hour_float <= h1:
+			var span := h1 - h0
+			var k := 0.0 if span <= 0.0 else (hour_float - h0) / span
+			return _key_colors[i].lerp(_key_colors[i + 1], k)
 	return Color.WHITE
 
 func _compute_phase() -> String:

@@ -1,10 +1,8 @@
-res://scripts/crime/crime_db.gd
-res://scripts/crime/crime_manager.gd
-res://scripts/crime/crime_system.gd
-res://scripts/law/law_manager.gd
-res://scripts/law/law_system.gd
-res://scripts/law/posse_view.gd
-res://scripts/ui/crime_panel.gd
 res://scripts/ui/player_hud.gd
 res://scripts/world/world.gd
-res://scripts/events/event_manager.gd
+res://scripts/save/save_system.gd
+res://scripts/save/save_manager.gd
+res://scripts/menu/game_menu.gd
+res://scripts/core/game_time.gd
+res://scripts/player/player_avatar.gd
+res://scripts/ui/interaction_hud.gd

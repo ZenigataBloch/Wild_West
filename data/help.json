@@ -1,0 +1,9 @@
+{
+  "title": "WILD WEST",
+  "subtitle": "Menu e comandi",
+  "sections": [
+    {"title": "Movimento", "lines": ["WASD / frecce: muovi", "Shift: corri", "E: interagisci", "Rotella: zoom", "I: scheda personaggio"]},
+    {"title": "Pannelli", "lines": ["L: lavoro", "M: mercato", "N: bande e reputazione", "C: malaffare (furti, rapine, ricatti, contrabbando)"]},
+    {"title": "Partita", "lines": ["F1: questo menu", "F5: salva", "F6: carica il salvataggio più recente", "Autosalvataggio a ogni nuovo giorno", "Spazio: pausa, 1-4: velocità del tempo", "R: nuova partita"]}
+  ]
+}

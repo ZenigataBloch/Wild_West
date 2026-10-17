@@ -15,6 +15,7 @@ var facing: Vector2 = Vector2.DOWN
 var _bounds: Rect2 = Rect2()
 var _camera: Camera2D
 var _target: Interactable = null
+var _target_tick: int = 0
 
 func _ready() -> void:
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
@@ -57,15 +58,18 @@ func _physics_process(_delta: float) -> void:
 		speed *= float(mv.get("run_multiplier", 1.7))
 
 	velocity = dir * speed
-	if dir != Vector2.ZERO:
+	if dir != Vector2.ZERO and dir != facing:
 		facing = dir
+		queue_redraw()   # l'aspetto dipende solo dalla direzione: si ridisegna solo quando cambia
 	move_and_slide()
 	if _bounds.size != Vector2.ZERO:
 		global_position = global_position.clamp(
 			_bounds.position + Vector2(RADIUS, RADIUS),
 			_bounds.end - Vector2(RADIUS, RADIUS))
-	_update_target(active)
-	queue_redraw()
+	# La ricerca del punto interattivo più vicino non serve a ogni fotogramma: ogni 3, subito se non attivo.
+	_target_tick += 1
+	if not active or _target_tick % 3 == 0:
+		_update_target(active)
 
 func _axis(a: Key, b: Key) -> float:
 	return 1.0 if (Input.is_physical_key_pressed(a) or Input.is_physical_key_pressed(b)) else 0.0
@@ -78,8 +82,8 @@ func _update_target(active: bool) -> void:
 			var it := n as Interactable
 			if it == null:
 				continue
-			var d := global_position.distance_to(it.global_position)
-			if d <= it.radius and d < best_d:
+			var d := global_position.distance_squared_to(it.global_position)
+			if d <= it.radius * it.radius and d < best_d:
 				best = it
 				best_d = d
 	if best != _target:
@@ -102,11 +106,20 @@ func _set_zoom(z: float) -> void:
 	z = clampf(z, ZOOM_MIN, ZOOM_MAX)
 	_camera.zoom = Vector2(z, z)
 
-# Aspetto provvisorio: la grafica vera arriva con la Feature 4.
+# Aspetto del giocatore (disegnato da codice, sostituibile con sprite).
 func _draw() -> void:
-	draw_circle(Vector2(0, 10), 12.0, Color(0, 0, 0, 0.25))
+	# ombra a terra
+	draw_set_transform(Vector2(0, 12), 0.0, Vector2(1.0, 0.45))
+	draw_circle(Vector2.ZERO, 15.0, Color(0, 0, 0, 0.28))
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	# corpo con poncho, cintura e fibbia
 	draw_circle(Vector2.ZERO, RADIUS, Color("#4a6fa5"))
 	draw_arc(Vector2.ZERO, RADIUS, 0.0, TAU, 24, Color("#1f2f4a"), 2.0)
+	draw_arc(Vector2.ZERO, RADIUS - 5.0, 0.25, PI - 0.25, 12, Color("#5b3a1e"), 3.0)
+	draw_circle(Vector2(0, RADIUS - 5.0), 2.0, Color("#d4a53a"))
+	# viso rivolto nella direzione di marcia
 	draw_circle(facing * (RADIUS - 4.0), 4.0, Color("#e8c9a0"))
-	draw_rect(Rect2(-12, -RADIUS - 2, 24, 5), Color("#5b3a1e"))
-	draw_rect(Rect2(-7, -RADIUS - 10, 14, 9), Color("#5b3a1e"))
+	# cappello: tesa, calotta e fascia dorata
+	draw_rect(Rect2(-14, -RADIUS - 2, 28, 5), Color("#5b3a1e"))
+	draw_rect(Rect2(-7, -RADIUS - 11, 14, 10), Color("#6b4527"))
+	draw_rect(Rect2(-7, -RADIUS - 4, 14, 3), Color("#d4a53a"))

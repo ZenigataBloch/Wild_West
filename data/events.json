@@ -8,6 +8,7 @@
   "events": [
     {
       "id": "bank_robbery",
+      "scene": {"kind": "robbers", "seconds": 60, "distance": 170},
       "title": "Rapina in banca!",
       "weight": 3,
       "town_only": true,
@@ -26,6 +27,7 @@
     },
     {
       "id": "fire",
+      "scene": {"kind": "fire", "seconds": 60, "distance": 170},
       "title": "Incendio in città!",
       "weight": 3,
       "town_only": true,
@@ -43,6 +45,7 @@
     },
     {
       "id": "assault",
+      "scene": {"kind": "brawl", "seconds": 60, "distance": 170},
       "title": "Aggressione",
       "weight": 3,
       "text": "In un vicolo senti grida soffocate: due banditi stanno malmenando un viandante e frugandogli nelle tasche.",
@@ -59,6 +62,7 @@
     },
     {
       "id": "caravan",
+      "scene": {"kind": "caravan", "seconds": 60, "distance": 170},
       "title": "Arriva una carovana",
       "weight": 3,
       "town_only": false,
@@ -80,6 +84,7 @@
     },
     {
       "id": "random_duel",
+      "scene": {"kind": "duelist", "seconds": 60, "distance": 170},
       "title": "Un pistolero ti sfida",
       "weight": 2,
       "town_only": true,
@@ -94,6 +99,7 @@
     },
     {
       "id": "stranger",
+      "scene": {"kind": "stranger", "seconds": 60, "distance": 170},
       "title": "Incontro misterioso",
       "weight": 2,
       "text": "Un uomo avvolto in un poncho consunto ti affianca senza far rumore. \"Ho qualcosa che potrebbe farti comodo,\" sussurra. \"Per cinquanta dollari.\"",

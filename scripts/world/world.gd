@@ -6,6 +6,7 @@ extends Node2D
 ##        H -10 salute, J +10 salute, K +10 soldi, B aggiunge bende, G regala un'arma casuale,
 ##        V ti infligge una ferita casuale, T una sfida a duello,
 ##        L pannello dei lavori, M pannello del mercato.
+## I lotti senza edificio sono in vendita: E sul cartello per comprare terreno, casa o negozio (Feature 18).
 
 const CONFIG_PATH := "res://data/world_config.json"
 const AvatarScript := preload("res://scripts/player/player_avatar.gd")
@@ -32,6 +33,7 @@ var _duels: DuelManager
 var _jobs: JobManager
 var _economy: EconomyManager
 var _bank: BankManager
+var _property: PropertyManager
 
 func _ready() -> void:
 	var f := FileAccess.open(CONFIG_PATH, FileAccess.READ)
@@ -78,6 +80,7 @@ func _new_game(forced_seed: int) -> void:
 	PlayerState.new_character()
 	DialogueState.reset()
 	BuildingActions.reset()
+	PropertySystem.reset()
 	town = TownGenerator.generate(_town_cfg)
 	scenery = SceneryGenerator.generate(_world_cfg, town)
 
@@ -90,7 +93,7 @@ func _new_game(forced_seed: int) -> void:
 	avatar.setup(bounds, origin)
 	queue_redraw()
 
-# Lotti solidi, edifici (Feature 5), NPC (Feature 6-8); segnaposto solo sui lotti ancora liberi.
+# Lotti solidi, edifici (Feature 5), NPC (Feature 6-8); i lotti ancora liberi vanno in vendita (Feature 18).
 func _build_town_nodes() -> void:
 	if _town_root != null:
 		_town_root.queue_free()
@@ -154,8 +157,12 @@ func _build_town_nodes() -> void:
 	for b in _buildings.buildings:
 		used.append(b["rect"])
 
+	_property = PropertyManager.new()
+	_town_root.add_child(_property)
+	_property.message.connect(_prompt_hud.show_message)
+	_property.setup(town["lots"], used, _buildings.street_y)
+
 	for i in town["lots"].size():
-		var lot: Dictionary = town["lots"][i]
 		var rect: Rect2 = rects[i]
 
 		var body := StaticBody2D.new()
@@ -166,19 +173,6 @@ func _build_town_nodes() -> void:
 		shape.shape = rs
 		body.add_child(shape)
 		_town_root.add_child(body)
-
-		if used.has(rect):
-			continue
-		var it := Interactable.new()
-		it.prompt = "Esamina il lotto"
-		it.message = "Lotto %d (%s): terreno libero." % [lot["id"], lot["side"]]
-		var edge_y: float = rect.end.y + 30.0 if lot["side"] == "nord" else rect.position.y - 30.0
-		it.position = Vector2(rect.get_center().x, edge_y)
-		it.interacted.connect(_on_interacted.bind(it))
-		_town_root.add_child(it)
-
-func _on_interacted(it: Interactable) -> void:
-	_prompt_hud.show_message(it.message)
 
 func _process(_d: float) -> void:
 	_modulate.color = GameTime.get_light_color()

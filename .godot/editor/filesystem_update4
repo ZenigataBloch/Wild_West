@@ -4,3 +4,5 @@ res://scripts/ui/building_panel.gd
 res://scripts/ui/player_hud.gd
 res://scripts/world/world.gd
 res://scripts/ui/market_panel.gd
+res://scripts/bank/bank_system.gd
+res://scripts/ui/bank_section.gd

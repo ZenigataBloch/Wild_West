@@ -13,6 +13,7 @@ var _money_label: Label
 var _weapon_label: Label
 var _wound_label: Label
 var _debt_label: Label
+var _prop_label: Label
 var _sheet: CenterContainer
 var _sheet_title: Label
 var _stats_box: GridContainer
@@ -45,8 +46,10 @@ func _ready() -> void:
 	debt_timer.wait_time = 1.0
 	debt_timer.autostart = true
 	debt_timer.timeout.connect(_refresh_debt)
+	debt_timer.timeout.connect(_refresh_property)
 	add_child(debt_timer)
 	_refresh_debt()
+	_refresh_property()
 
 func _build_hud() -> void:
 	var panel := PanelContainer.new()
@@ -78,6 +81,8 @@ func _build_hud() -> void:
 	box.add_child(_wound_label)
 	_debt_label = Label.new()
 	box.add_child(_debt_label)
+	_prop_label = Label.new()
+	box.add_child(_prop_label)
 
 	var hint := Label.new()
 	hint.text = "[I] Scheda  [P] Reputazione  [Q] Missioni"
@@ -153,6 +158,16 @@ func _refresh_debt() -> void:
 		_debt_label.add_theme_color_override("font_color", Color(0.95, 0.4, 0.35))
 	else:
 		_debt_label.remove_theme_color_override("font_color")
+
+# Proprietà (Feature 18): numero, incassi dei negozi e tasse arretrate; cambiano anche col passare dei giorni.
+func _refresh_property() -> void:
+	var t := PropertySystem.hud_text()
+	_prop_label.visible = t != ""
+	_prop_label.text = t
+	if PropertySystem.total_dues() > 0:
+		_prop_label.add_theme_color_override("font_color", Color(0.95, 0.4, 0.35))
+	else:
+		_prop_label.remove_theme_color_override("font_color")
 
 func _refresh_hud() -> void:
 	_name_label.text = PlayerState.player_name

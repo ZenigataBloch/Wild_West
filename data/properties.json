@@ -1,0 +1,116 @@
+{
+	"good": "immobili",
+	"max_properties": 5,
+	"land": {
+		"price_per_k": 2.6,
+		"min_price": 90
+	},
+	"sell": {
+		"ratio": 0.6,
+		"market_min": 0.8,
+		"market_max": 1.2
+	},
+	"taxes": {
+		"auto_pay_bank": true,
+		"grace_days": 15,
+		"warn_days_left": 3
+	},
+	"types": {
+		"terreno": {
+			"name": "Terreno",
+			"tax": 1,
+			"desc": "Un lotto di tua proprietà, recintato e libero. Puoi costruirci una casa o un negozio."
+		},
+		"casa": {
+			"name": "Casa di proprietà",
+			"sign": "CASA",
+			"color": "#9a7449",
+			"roof": "#5a3d22",
+			"build_cost": 180,
+			"build_days": 2,
+			"tax": 2,
+			"stash_slots": 8,
+			"wake_hour": 6,
+			"desc": "La tua casa: dormi gratis, ti rimetti in forze e hai un ripostiglio sicuro dove lasciare armi e provviste."
+		},
+		"negozio": {
+			"name": "Negozio",
+			"sign": "NEGOZIO",
+			"color": "#6f7f4a",
+			"roof": "#3a4426",
+			"build_cost": 320,
+			"build_days": 3,
+			"tax": 4,
+			"desc": "Un negozio con un commesso che lavora per te. Gli incassi dipendono dal mercato delle merci, dalla tua fama tra i cittadini e dal tuo Carisma."
+		}
+	},
+	"shop": {
+		"base_daily": 44,
+		"wage": 8,
+		"noise": 0.2,
+		"till_cap": 400,
+		"good": "merci",
+		"supply_per_day": 0.015,
+		"carisma_bonus": 0.03,
+		"flow_group": "cittadini",
+		"flow_by_tier": {
+			"Odiato": 0.5,
+			"Malvisto": 0.8,
+			"Sconosciuto": 1.0,
+			"Rispettato": 1.25,
+			"Leggenda": 1.5
+		},
+		"law_group": "legge",
+		"law_protect_min": 15,
+		"law_protect_mult": 0.4,
+		"events": [
+			{"id": "cliente_ricco", "chance": 0.08, "kind": "bonus", "amount": [20, 60], "text": "Un cliente facoltoso ha fatto grossi acquisti al tuo negozio (+${amount})."},
+			{"id": "furto", "chance": 0.06, "kind": "theft", "frac": [0.25, 0.5], "text": "Dei ladri hanno svuotato parte della cassa del tuo negozio (-${amount})."},
+			{"id": "ispezione", "chance": 0.05, "kind": "fine", "amount": [8, 20], "text": "Un'ispezione ha multato il tuo negozio (-${amount})."}
+		]
+	},
+	"reputation": {
+		"first_property": {"cittadini": 3},
+		"shop_built": {"commercianti": 4},
+		"seized": {"cittadini": -8, "commercianti": -10}
+	},
+	"signs": {
+		"free": "IN VENDITA",
+		"building": "CANTIERE"
+	},
+	"text": {
+		"too_many": "Possiedi già il massimo di proprietà ({max}).",
+		"no_money": "Non hai abbastanza soldi (servono ${price}).",
+		"not_free": "Questo lotto non è in vendita.",
+		"not_yours": "Questo lotto non è tuo.",
+		"not_land": "Qui c'è già una costruzione.",
+		"unknown_type": "Non si può costruire questo.",
+		"bought_land": "Compri il lotto {lot} per ${price}. Ora è tuo.",
+		"bought_build": "Compri il lotto {lot} e avvii i lavori: {name} pronta il giorno {day}. Spesa totale ${price}.",
+		"build_started": "Cantiere avviato sul lotto {lot}: {name} pronta il giorno {day}. Spesa ${price}.",
+		"build_done": "Lavori finiti sul lotto {lot}: {name} è pronta!",
+		"build_wait": "I lavori finiranno il giorno {day} (fra {left} giorni).",
+		"not_built": "I lavori non sono ancora finiti.",
+		"sold": "Vendi {name} (lotto {lot}) e ricevi ${amount}.",
+		"sold_dues": "Vendi {name} (lotto {lot}): ${amount} dopo aver saldato ${dues} di tasse.",
+		"stash_not_empty": "Svuota il ripostiglio prima di vendere la casa.",
+		"dues_paid": "Paghi ${amount} di tasse sul lotto {lot}.",
+		"dues_part": "Versi ${amount} di tasse sul lotto {lot}: restano ${left}.",
+		"no_dues": "Non ci sono tasse da pagare.",
+		"no_cash": "Non hai contanti da versare.",
+		"slept": "Dormi nel tuo letto e ti svegli riposato all'alba.",
+		"slept_bandage": " Prima di coricarti fasci le ferite che sanguinavano.",
+		"till_empty": "La cassa è vuota.",
+		"till_taken": "Ritiri ${amount} dalla cassa del negozio.",
+		"stash_full": "Il ripostiglio è pieno.",
+		"pack_full": "Lo zaino è pieno.",
+		"stash_in": "Riponi {item} nel ripostiglio.",
+		"stash_out": "Riprendi {item} dal ripostiglio.",
+		"tax_warn": "Lotto {lot}: tasse non pagate da {days} giorni. Entro {left} giorni il comune pignora la proprietà!",
+		"seized": "Il comune ha pignorato {name} (lotto {lot}) per tasse non pagate. Perdi la proprietà.",
+		"seized_stash": " Gli oggetti nel ripostiglio sono andati persi.",
+		"foreclosed": "La banca ha preso {name} (lotto {lot}) a copertura del debito: ${applied} scalati dal prestito.",
+		"foreclosed_excess": " Ti restituisce ${excess} di differenza.",
+		"auto_paid": "Tasse del giorno pagate dal conto in banca: ${amount}."
+	}
+}

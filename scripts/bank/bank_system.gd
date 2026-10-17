@@ -2,12 +2,14 @@ class_name BankSystem
 extends RefCounted
 ## Sistema banca (Feature 17): deposito, prestiti, debiti e interessi. Dati in data/bank.json.
 ## - Il conto in banca frutta un piccolo interesse ogni giorno di gioco.
-## - Il fido dipende dalla reputazione presso i commercianti (fascia) più il deposito in cassa (garanzia).
+## - Il fido dipende dalla reputazione presso i commercianti (fascia) più il deposito in cassa e le proprietà
+##   (Feature 18, PropertySystem) come garanzia.
 ## - Tasso del prestito = tasso base x reputazione (stessa fascia dei prezzi) x mercato (indice dei beni
 ##   che compri, EconomySystem) x durata scelta. Commissione di apertura aggiunta al debito.
 ## - Il debito matura interessi ogni giorno. Dopo la scadenza scattano penale, tasso doppio e reputazione
 ##   in calo; dopo alcuni giorni di ritardo la banca dichiara l'insolvenza: sequestra il deposito,
-##   punisce reputazione e rapporto con il banchiere e ti nega credito per un po' (lista nera).
+##   punisce reputazione e rapporto con il banchiere e ti nega credito per un po' (lista nera). Se il deposito
+##   non basta, la banca ipoteca la proprietà di maggior valore (PropertySystem.foreclose).
 ## Tutto vive in memoria (il salvataggio arriverà più avanti). `advance_to(giorno)` la chiama BankManager.
 
 const PATH := "res://data/bank.json"
@@ -153,12 +155,17 @@ static func tier_limit() -> int:
 	return int(section("loans").get("limits", {}).get(label, 0))
 
 
+## Garanzia data dalle proprietà (Feature 18): una parte di quanto hai investito in terreni, case e negozi.
+static func property_collateral() -> int:
+	return PropertySystem.collateral(float(section("loans").get("property_collateral_factor", 0.0)))
+
+
 ## Cifra massima che puoi chiedere adesso (0 = nessun credito).
 static func max_loan() -> int:
 	var lc := section("loans")
 	if is_blacklisted() or has_overdue() or loans.size() >= int(lc.get("max_active", 2)):
 		return 0
-	var limit := tier_limit() + roundi(float(balance) * float(lc.get("collateral_factor", 1.0)))
+	var limit := tier_limit() + roundi(float(balance) * float(lc.get("collateral_factor", 1.0))) + property_collateral()
 	return maxi(0, limit - debt_total())
 
 
@@ -301,6 +308,14 @@ static func _default(loan: Dictionary, d: int) -> Array[String]:
 		balance -= seized
 		loan["remaining"] = int(loan["remaining"]) - seized
 		msgs.append(text("seized", {"seized": seized}))
+	if int(loan["remaining"]) > 0:
+		var fc := PropertySystem.foreclose(int(loan["remaining"]))
+		if not fc.is_empty():
+			loan["remaining"] = int(loan["remaining"]) - int(fc["applied"])
+			var fmsg := PropertySystem.text("foreclosed", {"name": fc["name"], "lot": fc["lot"], "applied": fc["applied"]})
+			if int(fc["excess"]) > 0:
+				fmsg += PropertySystem.text("foreclosed_excess", {"excess": fc["excess"]})
+			msgs.append(fmsg)
 	blacklist_until = d + int(pc.get("blacklist_days", 10))
 	ReputationSystem.add(_rep_group(), int(rc.get("default_commercianti", -20)))
 	ReputationSystem.add("cittadini", int(rc.get("default_cittadini", -6)))

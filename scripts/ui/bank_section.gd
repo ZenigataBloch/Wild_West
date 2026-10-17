@@ -133,7 +133,10 @@ func _build_new_loan() -> void:
 
 	var maxv := BankSystem.max_loan()
 	var cap := Label.new()
-	cap.text = "Puoi chiedere fino a $%d (il tuo conto in cassa fa da garanzia)." % maxv
+	var guarantee := "il tuo conto in cassa fa da garanzia"
+	if BankSystem.property_collateral() > 0:
+		guarantee = "conto in cassa e proprietà fanno da garanzia"
+	cap.text = "Puoi chiedere fino a $%d (%s)." % [maxv, guarantee]
 	cap.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	cap.custom_minimum_size = Vector2(430, 0)
 	_body.add_child(cap)

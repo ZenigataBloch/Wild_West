@@ -15,7 +15,8 @@
     "armi": {"label": "Armi", "desc": "L'armeria dello sceriffo.", "kind": "buy"},
     "minerali": {"label": "Minerali", "desc": "Cosa vale il lavoro in miniera.", "kind": "sell"},
     "pelli": {"label": "Pelli e carne", "desc": "Cosa vale il lavoro del cacciatore.", "kind": "sell"},
-    "merci": {"label": "Merci da commercio", "desc": "Quanto rende il commercio.", "kind": "sell"}
+    "merci": {"label": "Merci da commercio", "desc": "Quanto rende il commercio.", "kind": "sell"},
+    "immobili": {"label": "Terreni e costruzioni", "desc": "Lotti, cantieri e immobili della città.", "kind": "buy"}
   },
   "events": [
     {"id": "carestia", "title": "Carestia", "text": "Il raccolto è andato male: cibo e bevande scarseggiano.", "weight": 3, "days": [3, 5], "effects": {"cibo": {"supply": 0.7}}},
@@ -24,7 +25,9 @@
     {"id": "domanda_ferro", "title": "Fame di minerali", "text": "La ferrovia compra minerali a qualsiasi prezzo.", "weight": 2, "days": [3, 5], "effects": {"minerali": {"demand": 1.35}}},
     {"id": "inverno_pelli", "title": "Inverno rigido", "text": "Tutti vogliono pelli e carne per l'inverno.", "weight": 2, "days": [3, 5], "effects": {"pelli": {"demand": 1.35}, "cibo": {"demand": 1.1}}},
     {"id": "scontri", "title": "Tensione in città", "text": "Gira voce di guai: armi e bende vanno a ruba.", "weight": 2, "days": [2, 4], "effects": {"armi": {"demand": 1.3}, "medicine": {"demand": 1.3}}},
-    {"id": "fiera", "title": "Fiera del bestiame", "text": "Per la fiera la città è piena di gente: alloggi e merci si vendono bene.", "weight": 2, "days": [2, 3], "effects": {"alloggio": {"demand": 1.35}, "merci": {"demand": 1.25}}}
+    {"id": "fiera", "title": "Fiera del bestiame", "text": "Per la fiera la città è piena di gente: alloggi e merci si vendono bene.", "weight": 2, "days": [2, 3], "effects": {"alloggio": {"demand": 1.35}, "merci": {"demand": 1.25}}},
+    {"id": "corsa_terre", "title": "Corsa alle terre", "text": "Si dice che la ferrovia passerà da qui: tutti vogliono un pezzo di terra.", "weight": 2, "days": [3, 6], "effects": {"immobili": {"demand": 1.4}}},
+    {"id": "calo_terre", "title": "Si vende e si parte", "text": "Molti coloni lasciano la città: lotti e case costano meno.", "weight": 2, "days": [3, 5], "effects": {"immobili": {"supply": 1.3}}}
   ],
   "text": {
     "event_start": "Notizie dal mercato — {title}: {text}",

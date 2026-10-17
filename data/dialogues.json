@@ -638,7 +638,7 @@
 					]
 				},
 				"loans": {
-					"text": "Un prestito? Il fido dipende dalla reputazione tra i commercianti e dal deposito che tiene in cassa, che vale come garanzia. Il tasso segue il mercato. Se non paga, ci rivarremo sul suo conto.",
+					"text": "Un prestito? Il fido dipende dalla reputazione tra i commercianti e dal deposito che tiene in cassa, che vale come garanzia insieme alle proprietà che possiede. Il tasso segue il mercato. Se non paga, ci rivarremo sul suo conto e, se serve, sulla sua proprietà di maggior valore.",
 					"choices": [
 						{
 							"text": "Capisco.",

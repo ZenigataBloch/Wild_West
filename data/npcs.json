@@ -1,0 +1,35 @@
+{
+	"count": 10,
+	"first_names": ["Amos", "Clara", "Ezra", "Hattie", "Silas", "Josiah", "Mabel", "Wyatt", "Ruth", "Clyde", "Ida", "Boone", "Nell", "Tobias", "Pearl", "Gideon"],
+	"last_names": ["Baxter", "Holloway", "Mercer", "Callahan", "Dunne", "Whitaker", "Pruitt", "Slade", "Ketchum", "Barlow", "Tanner", "Rourke", "Hale", "Garrett", "Thorne", "Voss"],
+	"nicknames": ["il Lungo", "Occhio di Falco", "la Volpe", "Mano Svelta", "il Sordo", "Zoppo", "Barba Rossa"],
+	"nickname_chance": 0.25,
+	"stat_names": ["forza", "mira", "agilita", "carisma", "resistenza"],
+	"stat_labels": {"forza": "Forza", "mira": "Mira", "agilita": "Agilità", "carisma": "Carisma", "resistenza": "Resistenza"},
+	"stat_base": [3, 6],
+	"skins": ["#e0b48a", "#c68e63", "#8d5a3a", "#f1cfa8"],
+	"shirts": ["#7a2e2e", "#2e4a7a", "#3f6b3a", "#6b5a2e", "#5a3a6b", "#8a8a7a"],
+	"hats": ["#4a2f1a", "#2b2b2b", "#6b4527", "#8a6a45", "#3a3a4a"],
+	"jobs": {
+		"sceriffo": {"label": "Sceriffo", "role": "Autorità", "workplace": "sheriff", "guaranteed": 1, "bias": {"mira": 2, "carisma": 1}, "age": [30, 60], "badge": true},
+		"banchiere": {"label": "Banchiere", "role": "Notabile", "workplace": "bank", "guaranteed": 1, "bias": {"carisma": 2}, "age": [35, 65]},
+		"barista": {"label": "Barista", "role": "Lavoratore", "workplace": "saloon", "guaranteed": 1, "bias": {"carisma": 1}, "age": [20, 55]},
+		"minatore": {"label": "Minatore", "role": "Lavoratore", "workplace": "", "weight": 3, "bias": {"forza": 2, "resistenza": 1}, "age": [20, 55]},
+		"cacciatore": {"label": "Cacciatore", "role": "Lavoratore", "workplace": "", "weight": 2, "bias": {"mira": 2, "agilita": 1}, "age": [22, 55]},
+		"commerciante": {"label": "Commerciante", "role": "Commerciante", "workplace": "", "weight": 3, "bias": {"carisma": 1}, "age": [25, 60]},
+		"mercenario": {"label": "Mercenario", "role": "Mercenario", "workplace": "", "weight": 1, "bias": {"forza": 1, "mira": 1}, "age": [22, 50]}
+	},
+	"relationship": {
+		"start": 0,
+		"min": -100,
+		"max": 100,
+		"levels": [
+			{"max": -60, "label": "Nemico"},
+			{"max": -20, "label": "Ostile"},
+			{"max": 20, "label": "Neutrale"},
+			{"max": 60, "label": "Amichevole"},
+			{"max": 100, "label": "Alleato"}
+		],
+		"first_greeting_bonus": 5
+	}
+}

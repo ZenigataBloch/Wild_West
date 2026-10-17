@@ -1,0 +1,32 @@
+{
+	"palette": {
+		"wood_dark": "#2b1b10",
+		"wood": "#4a2f1a",
+		"wood_light": "#6b4527",
+		"parchment": "#e6d3a3",
+		"parchment_dark": "#c9b078",
+		"ink": "#2a1a0e",
+		"gold": "#d4a53a",
+		"gold_dark": "#8a6a1f",
+		"blood": "#8c1c13",
+		"health_bg": "#3a1410",
+		"ok": "#5a7a2e"
+	},
+	"font": {
+		"file": "res://assets/fonts/western.ttf",
+		"fallback_names": ["Rockwell Extra Bold", "Rockwell", "Georgia", "Book Antiqua", "Palatino Linotype", "serif"],
+		"size": 18,
+		"title_size": 26
+	},
+	"panel": {
+		"border": 4,
+		"radius": 6,
+		"margin": 14,
+		"title_height": 34,
+		"open_time": 0.22
+	},
+	"shader": {
+		"grain": 0.07,
+		"vignette": 0.30
+	}
+}

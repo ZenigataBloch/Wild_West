@@ -1,0 +1,321 @@
+{
+  "town_radius": 600,
+  "melee_types": [
+    "lama",
+    "contundente"
+  ],
+  "min_health_to_work": 15,
+  "health_floor": 5,
+  "stat_pay_per_point": 0.05,
+  "ranks": [
+    {
+      "name": "Apprendista",
+      "shifts": 0,
+      "pay_mult": 1.0
+    },
+    {
+      "name": "Esperto",
+      "shifts": 5,
+      "pay_mult": 1.3
+    },
+    {
+      "name": "Maestro",
+      "shifts": 15,
+      "pay_mult": 1.7
+    }
+  ],
+  "order": [
+    "minatore",
+    "barista",
+    "cacciatore",
+    "mercenario",
+    "commerciante"
+  ],
+  "jobs": {
+    "minatore": {
+      "name": "Minatore",
+      "desc": "Scavi nelle gallerie fuori città, dall'alba a metà giornata. Duro, pesante, ma la paga è sicura.",
+      "stat": "forza",
+      "base_pay": 26,
+      "hours": 8,
+      "window": [
+        5,
+        12
+      ],
+      "area": "wilds",
+      "rep": {
+        "cittadini": 1
+      },
+      "risks": "Possibili crolli e ferite; con un po' di fortuna trovi un filone ricco.",
+      "events": [
+        {
+          "chance": 0.2,
+          "text": "Il piccone fa risuonare un filone ricco!",
+          "ok": {
+            "text": "Estrai pepite in più.",
+            "pay": 18
+          }
+        },
+        {
+          "chance": 0.14,
+          "text": "La volta della galleria scricchiola...",
+          "stat": "resistenza",
+          "diff": 5,
+          "ok": {
+            "text": "Ti butti di lato: la frana ti sfiora."
+          },
+          "fail": {
+            "text": "Una frana ti travolge!",
+            "damage": [
+              6,
+              13
+            ],
+            "pay": -6
+          }
+        }
+      ],
+      "place": {
+        "kind": "site",
+        "id": "miniera",
+        "radius": 170,
+        "label": "la miniera"
+      },
+      "good": "minerali",
+      "supply": 0.05
+    },
+    "barista": {
+      "name": "Barista",
+      "desc": "Servi whiskey al saloon nel tardo pomeriggio e la sera. Mance, chiacchiere e qualche rissa.",
+      "stat": "carisma",
+      "base_pay": 14,
+      "hours": 6,
+      "window": [
+        15,
+        22
+      ],
+      "area": "town",
+      "rep": {
+        "cittadini": 1,
+        "commercianti": 1
+      },
+      "risks": "Le risse nel locale possono costare un livido... o una ferita.",
+      "events": [
+        {
+          "chance": 0.55,
+          "text": "Un cliente allegro lascia una mancia.",
+          "stat": "carisma",
+          "diff": 4,
+          "ok": {
+            "text": "Con il tuo savoir-faire la mancia è generosa.",
+            "pay": 10
+          },
+          "fail": {
+            "text": "La mancia è scarsa.",
+            "pay": 2
+          }
+        },
+        {
+          "chance": 0.16,
+          "text": "Scoppia una rissa davanti al bancone!",
+          "stat": "forza",
+          "diff": 5,
+          "ok": {
+            "text": "Separi i litiganti: il locale ti ringrazia.",
+            "pay": 6,
+            "rep": {
+              "cittadini": 2
+            }
+          },
+          "fail": {
+            "text": "Prendi un pugno in faccia.",
+            "damage": [
+              4,
+              9
+            ],
+            "rep": {
+              "cittadini": -1
+            }
+          }
+        }
+      ],
+      "place": {
+        "kind": "building",
+        "id": "saloon",
+        "radius": 170,
+        "label": "il Saloon"
+      },
+      "good": "cibo"
+    },
+    "cacciatore": {
+      "name": "Cacciatore",
+      "desc": "Batti la prateria all'alba in cerca di selvaggina e pelli da vendere. Serve un'arma da fuoco in mano.",
+      "stat": "mira",
+      "base_pay": 20,
+      "hours": 6,
+      "window": [
+        4,
+        11
+      ],
+      "area": "wilds",
+      "needs_weapon": true,
+      "rep": {
+        "commercianti": 1
+      },
+      "risks": "Predatori affamati possono attaccarti.",
+      "events": [
+        {
+          "chance": 0.4,
+          "text": "Tracce fresche di cervo tra i cespugli.",
+          "stat": "mira",
+          "diff": 5,
+          "ok": {
+            "text": "Un colpo pulito: pelli e carne di prima qualità.",
+            "pay": 16
+          },
+          "fail": {
+            "text": "L'animale fugge: perdi tempo.",
+            "pay": -2
+          }
+        },
+        {
+          "chance": 0.16,
+          "text": "Un lupo ti ha fiutato e ti gira intorno!",
+          "combat": {
+            "enemies": [
+              "lupo"
+            ],
+            "title": "Il lupo della prateria"
+          },
+          "pay": 4
+        }
+      ],
+      "good": "pelli",
+      "supply": 0.04
+    },
+    "mercenario": {
+      "name": "Mercenario",
+      "desc": "Fai la scorta ai carri e risolvi le dispute di chi paga. Pagato bene, ma non fai domande. Serve un'arma da fuoco.",
+      "stat": "mira",
+      "base_pay": 36,
+      "hours": 6,
+      "window": [
+        7,
+        19
+      ],
+      "area": "any",
+      "needs_weapon": true,
+      "rep": {
+        "gang": 2,
+        "legge": -1
+      },
+      "risks": "Imboscate di banditi: il combattimento è nel conto.",
+      "events": [
+        {
+          "chance": 0.2,
+          "text": "Il committente apprezza il tuo sangue freddo.",
+          "stat": "carisma",
+          "diff": 5,
+          "ok": {
+            "text": "Ti dà un extra per il disturbo.",
+            "pay": 14
+          },
+          "fail": {
+            "text": "Il committente brontola e non aggiunge nulla."
+          }
+        },
+        {
+          "chance": 0.35,
+          "text": "Dei banditi attaccano la scorta!",
+          "combat": {
+            "enemies": [
+              "bandito"
+            ],
+            "title": "Imboscata alla scorta"
+          },
+          "pay": 20
+        }
+      ]
+    },
+    "commerciante": {
+      "name": "Commerciante",
+      "desc": "Compri merci all'ingrosso e le rivendi in città con un ricarico. Più capitale metti, più guadagni (e rischi).",
+      "stat": "carisma",
+      "base_pay": 6,
+      "hours": 5,
+      "window": [
+        8,
+        17
+      ],
+      "area": "town",
+      "min_money": 30,
+      "rep": {
+        "commercianti": 2
+      },
+      "risks": "Merci rubate o invendute possono mangiarsi parte del capitale.",
+      "trade": {
+        "capital_ratio": 0.4,
+        "capital_cap": 150,
+        "margin_base": 0.1,
+        "margin_per_stat": 0.015,
+        "margin_noise": 0.08,
+        "margin_rep": 0.05,
+        "margin_market": 0.5
+      },
+      "events": [
+        {
+          "chance": 0.15,
+          "text": "Un carro di merci viene derubato.",
+          "stat": "forza",
+          "diff": 5,
+          "ok": {
+            "text": "Riesci a recuperare tutto in tempo."
+          },
+          "fail": {
+            "text": "Perdi parte del carico.",
+            "stock_loss": 0.3
+          }
+        },
+        {
+          "chance": 0.2,
+          "text": "Un cliente fa un ordine speciale.",
+          "ok": {
+            "text": "Vendi un lotto a prezzo pieno.",
+            "pay": 12
+          }
+        }
+      ],
+      "place": {
+        "kind": "building",
+        "id": "bank",
+        "radius": 170,
+        "label": "la Banca"
+      },
+      "good": "merci",
+      "supply": 0.03
+    }
+  },
+  "text": {
+    "no_job": "Prima prendi servizio.",
+    "low_health": "Sei troppo malconcio per lavorare.",
+    "need_weapon": "Per questo lavoro serve un'arma da fuoco in mano.",
+    "need_money": "Ti servono almeno ${n} per fare il commerciante.",
+    "need_town": "Questo lavoro si fa in città.",
+    "need_wilds": "Questo lavoro si fa fuori città: allontanati dalle case.",
+    "wrong_hour": "Si lavora solo dalle {a}:00 alle {b}:00.",
+    "hired": "Hai preso servizio come {job}.",
+    "quit": "Hai lasciato il lavoro di {job}.",
+    "rank_up": "Promozione! Ora sei {rank} ({job}).",
+    "shift_end": "Turno finito: {pay}.",
+    "trade_profit": "Vendi la merce (investiti ${stock}): guadagni ${profit}.",
+    "trade_loss": "Vendi male la merce (investiti ${stock}): perdi ${loss}.",
+    "need_place": "Per questo lavoro devi andare presso {place}.",
+    "market_note": "Mercato ({good}): {pct} rispetto alla norma, la paga ne risente."
+  },
+  "site": {
+    "id": "miniera",
+    "distance": [
+      720,
+      1000
+    ]
+  }
+}

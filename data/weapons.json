@@ -1,0 +1,73 @@
+{
+	"_doc": "Armi del gioco. damage = [min, max]; accuracy = modificatore alla probabilità di colpire (0.05 = +5%); crit_bonus (opzionale) si somma alla probabilità di critico; price = prezzo base (la reputazione presso i commercianti lo modifica); the = nome con articolo, usato nei testi di combattimento. Per aggiungere un'arma basta una nuova voce qui.",
+	"types": {
+		"pistola": {"label": "Pistola", "kind": "ranged", "hit_text": "Fai fuoco con %s e centri"},
+		"fucile": {"label": "Fucile", "kind": "ranged", "hit_text": "Prendi la mira con %s e centri"},
+		"doppietta": {"label": "Doppietta", "kind": "ranged", "hit_text": "Scarichi %s a bruciapelo"},
+		"lama": {"label": "Arma bianca", "kind": "melee", "hit_text": "Colpisci con %s"},
+		"contundente": {"label": "Arma contundente", "kind": "melee", "hit_text": "Abbatti %s"}
+	},
+	"rarities": {
+		"comune": {"label": "Comune", "color": "#b8b0a0", "weight": 60},
+		"non_comune": {"label": "Non comune", "color": "#6fbf6f", "weight": 28},
+		"raro": {"label": "Raro", "color": "#5b9bd5", "weight": 10},
+		"leggendario": {"label": "Leggendario", "color": "#e0a526", "weight": 2}
+	},
+	"weapons": {
+		"revolver_usato": {
+			"name": "Revolver usato", "the": "il revolver usato", "type": "pistola", "rarity": "comune",
+			"damage": [6, 12], "accuracy": 0.0, "price": 20,
+			"desc": "Un vecchio sei colpi, graffiato ma ancora affidabile."
+		},
+		"colt_navy": {
+			"name": "Colt Navy", "the": "il Colt Navy", "type": "pistola", "rarity": "comune",
+			"damage": [7, 12], "accuracy": 0.03, "price": 35,
+			"desc": "Rivoltella ben bilanciata, comoda e precisa."
+		},
+		"schofield": {
+			"name": "Schofield", "the": "lo Schofield", "type": "pistola", "rarity": "non_comune",
+			"damage": [8, 13], "accuracy": 0.05, "price": 70,
+			"desc": "Si ricarica in fretta ed è usata da molti sceriffi."
+		},
+		"peacemaker": {
+			"name": "Colt Peacemaker", "the": "il Colt Peacemaker", "type": "pistola", "rarity": "raro",
+			"damage": [10, 16], "accuracy": 0.08, "crit_bonus": 0.05, "price": 150,
+			"desc": "La pistola che ha fatto la storia del West."
+		},
+		"giustiziere": {
+			"name": "Il Giustiziere", "the": "il Giustiziere", "type": "pistola", "rarity": "leggendario",
+			"damage": [13, 19], "accuracy": 0.15, "crit_bonus": 0.10, "price": 450,
+			"desc": "Un Colt con l'impugnatura d'avorio incisa. Dicono non abbia mai mancato un bersaglio."
+		},
+		"winchester": {
+			"name": "Winchester 1873", "the": "la Winchester 1873", "type": "fucile", "rarity": "non_comune",
+			"damage": [8, 14], "accuracy": 0.10, "price": 95,
+			"desc": "Il fucile che ha vinto il West: leggero e preciso."
+		},
+		"sharps": {
+			"name": "Sharps", "the": "la Sharps", "type": "fucile", "rarity": "raro",
+			"damage": [13, 21], "accuracy": -0.05, "crit_bonus": 0.08, "price": 190,
+			"desc": "Un colpo solo, ma pesantissimo. Usata per i bufali."
+		},
+		"doppietta": {
+			"name": "Doppietta", "the": "la doppietta", "type": "doppietta", "rarity": "non_comune",
+			"damage": [10, 18], "accuracy": -0.08, "price": 85,
+			"desc": "Devastante da vicino, meno affidabile da lontano."
+		},
+		"coltello": {
+			"name": "Coltello da caccia", "the": "il coltello da caccia", "type": "lama", "rarity": "comune",
+			"damage": [3, 7], "accuracy": 0.10, "price": 12,
+			"desc": "Lama larga e robusta. Veloce e difficile da schivare."
+		},
+		"mazza": {
+			"name": "Mazza ferrata", "the": "la mazza ferrata", "type": "contundente", "rarity": "comune",
+			"damage": [4, 9], "accuracy": 0.0, "price": 15,
+			"desc": "Un pezzo di quercia rinforzato con ferro."
+		},
+		"tomahawk": {
+			"name": "Tomahawk", "the": "il tomahawk", "type": "lama", "rarity": "raro",
+			"damage": [7, 13], "accuracy": 0.05, "crit_bonus": 0.06, "price": 120,
+			"desc": "Ascia da lancio e da mischia, letale nelle mani giuste."
+		}
+	}
+}

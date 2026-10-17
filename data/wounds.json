@@ -1,0 +1,19 @@
+{
+	"_doc": "Ferite del giocatore. Ogni colpo subito in combattimento può causare una ferita: la gravità dipende dal danno (min_dmg), la probabilità da chance. bleed = salute persa per ora di gioco finché non la fasci (0 = non sanguina); penalty = punti tolti alla statistica della parte del corpo; heal_hours = ore di gioco per guarire (il tempo non scorre per le ferite che sanguinano); bandaged_heal_mult = velocità di guarigione se fasciata. Per nuove ferite o parti del corpo basta una voce qui.",
+	"max_wounds": 6,
+	"max_penalty": 4,
+	"bandaged_heal_mult": 2.0,
+	"low_health_warning": 20,
+	"severities": {
+		"leggera": {"label": "Ferita leggera", "min_dmg": 3, "chance": 0.30, "bleed": 0, "penalty": 1, "heal_hours": 24},
+		"media": {"label": "Ferita", "min_dmg": 6, "chance": 0.45, "bleed": 1, "penalty": 1, "heal_hours": 48},
+		"grave": {"label": "Ferita grave", "min_dmg": 9, "chance": 0.60, "bleed": 3, "penalty": 2, "heal_hours": 96}
+	},
+	"parts": {
+		"braccio": {"label": "Braccio", "on": "al braccio", "stat": "mira", "weight": 3},
+		"spalla": {"label": "Spalla", "on": "alla spalla", "stat": "forza", "weight": 2},
+		"gamba": {"label": "Gamba", "on": "alla gamba", "stat": "agilita", "weight": 3},
+		"torso": {"label": "Torso", "on": "al torso", "stat": "resistenza", "weight": 3},
+		"testa": {"label": "Testa", "on": "alla testa", "stat": "carisma", "weight": 1}
+	}
+}

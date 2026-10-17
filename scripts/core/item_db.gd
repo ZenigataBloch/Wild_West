@@ -16,7 +16,12 @@ func _ready() -> void:
 		_items = data
 
 func get_item(id: String) -> Dictionary:
-	return _items.get(id, {})
+	if _items.has(id):
+		return _items[id]
+	# Le armi (data/weapons.json) sono oggetti dello zaino.
+	if WeaponDB.is_weapon(id):
+		return WeaponDB.item_def(id)
+	return {}
 
 func has_item(id: String) -> bool:
-	return _items.has(id)
+	return _items.has(id) or WeaponDB.is_weapon(id)

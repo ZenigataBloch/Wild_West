@@ -7,6 +7,9 @@ signal health_changed(current: int, maximum: int)
 signal money_changed(amount: int)
 signal stats_changed
 signal inventory_changed
+signal equipment_changed
+signal wounds_changed
+signal wound_message(text: String)
 signal item_used(item_id: String)
 signal player_died
 
@@ -19,6 +22,7 @@ var money: int = 0
 var stat_max: int = 10
 var stats: Dictionary = {}       # id -> valore
 var inventory: Array = []        # [{ "id": String, "qty": int }]
+var equipped_weapon: String = ""  # id arma (data/weapons.json), "" = a mani nude
 
 var _cfg: Dictionary = {}
 
@@ -41,14 +45,20 @@ func new_character(forced_name: String = "") -> void:
 	money = int(_cfg.get("start_money", 0))
 	stat_max = int(_cfg.get("stat_max", 10))
 	_roll_stats(rng)
+	WoundSystem.reset()
 	inventory.clear()
 	for entry in _cfg.get("start_items", []):
 		add_item(String(entry["id"]), int(entry["qty"]))
+	equipped_weapon = ""
+	var start_weapon := String(_cfg.get("start_weapon", ""))
+	if start_weapon != "" and has_item(start_weapon):
+		equipped_weapon = start_weapon
 	name_changed.emit(player_name)
 	health_changed.emit(health, max_health)
 	money_changed.emit(money)
 	stats_changed.emit()
 	inventory_changed.emit()
+	equipment_changed.emit()
 
 func _roll_stats(rng: RandomNumberGenerator) -> void:
 	stats.clear()
@@ -65,7 +75,12 @@ func _roll_stats(rng: RandomNumberGenerator) -> void:
 			stats[k] += 1
 			points -= 1
 
+## Statistica effettiva: valore base meno le penalità delle ferite (mai sotto 0).
 func get_stat(id: String) -> int:
+	return maxi(0, get_base_stat(id) - WoundSystem.stat_penalty(id))
+
+## Statistica senza penalità.
+func get_base_stat(id: String) -> int:
 	return int(stats.get(id, 0))
 
 func get_stat_label(id: String) -> String:
@@ -156,25 +171,41 @@ func remove_item(id: String, qty: int = 1) -> bool:
 	inventory_changed.emit()
 	return true
 
-## Usa un oggetto curativo. Non lo consuma se la salute è già piena.
+## Usa un oggetto curativo. Non lo consuma se la salute è già piena (le bende servono anche
+## per fermare un'emorragia).
 func use_item(id: String) -> bool:
 	var def := ItemDB.get_item(id)
 	if def.is_empty() or not def.has("heal") or count_item(id) <= 0:
 		return false
-	if health >= max_health or health <= 0:
+	var is_bandage := bool(def.get("bandage", false))
+	var treats := is_bandage and WoundSystem.is_bleeding()
+	if health <= 0 or (health >= max_health and not treats):
 		return false
 	remove_item(id, 1)
 	heal(int(def["heal"]))
+	if is_bandage:
+		WoundSystem.bandage()
 	item_used.emit(id)
 	return true
 
-## Per i futuri salvataggi.
-func to_dict() -> Dictionary:
-	return {
-		"name": player_name,
-		"health": health,
-		"max_health": max_health,
-		"money": money,
-		"stats": stats.duplicate(),
-		"inventory": inventory.duplicate(true)
-	}
+# --- Armi ---
+
+## Arma attualmente in mano ("" se nessuna, o se non è più nello zaino).
+func get_weapon() -> String:
+	if equipped_weapon != "" and has_item(equipped_weapon):
+		return equipped_weapon
+	return ""
+
+## Equipaggia un'arma presente nello zaino.
+func equip_weapon(id: String) -> bool:
+	if not WeaponDB.is_weapon(id) or not has_item(id):
+		return false
+	equipped_weapon = id
+	equipment_changed.emit()
+	return true
+
+func unequip_weapon() -> void:
+	if equipped_weapon == "":
+		return
+	equipped_weapon = ""
+	equipment_changed.emit()

@@ -14,6 +14,11 @@ var time_scale: float = 1.0
 var paused: bool = false
 var phase: String = "giorno"
 
+## Ora intera corrente (0-23). La usano gli orari degli edifici e le routine degli NPC.
+var hour: int:
+	get:
+		return int(hour_float)
+
 var _real_seconds_per_day: float = 600.0
 var _start_hour: float = 7.0
 var _phases: Dictionary = {}
@@ -58,11 +63,23 @@ func _process(delta: float) -> void:
 		phase = p
 		phase_changed.emit(phase)
 
+## Salta avanti fino alla prossima volta che l'orologio segna `target_hour` (dormire, svenire...).
+func skip_to_hour(target_hour: int) -> void:
+	var target := float(clampi(target_hour, 0, 23))
+	if hour_float >= target:
+		day += 1
+		day_changed.emit(day)
+	hour_float = target
+	_last_minute = -1
+	_last_hour = -1
+	var p := _compute_phase()
+	if p != phase:
+		phase = p
+		phase_changed.emit(phase)
+
 func get_time_string() -> String:
 	return "%02d:%02d" % [int(hour_float), int((hour_float - int(hour_float)) * 60.0)]
 
-func is_night() -> bool:
-	return phase == "notte"
 
 ## Colore ambientale per CanvasModulate (interpolato tra i keyframe).
 func get_light_color() -> Color:

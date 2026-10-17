@@ -1,0 +1,204 @@
+{
+ "poll_interval": 0.5,
+ "skip_hours": 2.0,
+ "walk_speed": [
+  45,
+  70
+ ],
+ "errand_targets": [
+  "bank",
+  "sheriff",
+  "saloon"
+ ],
+ "errand_dwell": [
+  4,
+  9
+ ],
+ "slots": [
+  {
+   "id": "notte",
+   "label": "Notte",
+   "from": 22,
+   "to": 6,
+   "activities": [
+    {
+     "type": "home",
+     "weight": 10
+    }
+   ]
+  },
+  {
+   "id": "mattina",
+   "label": "Mattina",
+   "from": 6,
+   "to": 12,
+   "activities": [
+    {
+     "type": "work",
+     "weight": 10
+    }
+   ]
+  },
+  {
+   "id": "pomeriggio",
+   "label": "Pomeriggio",
+   "from": 12,
+   "to": 18,
+   "activities": [
+    {
+     "type": "work",
+     "weight": 4
+    },
+    {
+     "type": "errand",
+     "weight": 4
+    },
+    {
+     "type": "wander",
+     "weight": 2
+    }
+   ]
+  },
+  {
+   "id": "sera",
+   "label": "Sera",
+   "from": 18,
+   "to": 22,
+   "activities": [
+    {
+     "type": "saloon",
+     "weight": 6
+    },
+    {
+     "type": "gather",
+     "weight": 3
+    },
+    {
+     "type": "home",
+     "weight": 1
+    }
+   ]
+  }
+ ],
+ "job_overrides": {
+  "barista": {
+   "sera": [
+    {
+     "type": "work",
+     "weight": 10
+    }
+   ]
+  },
+  "sceriffo": {
+   "pomeriggio": [
+    {
+     "type": "work",
+     "weight": 6
+    },
+    {
+     "type": "wander",
+     "weight": 4
+    }
+   ],
+   "sera": [
+    {
+     "type": "work",
+     "weight": 6
+    },
+    {
+     "type": "gather",
+     "weight": 2
+    },
+    {
+     "type": "saloon",
+     "weight": 2
+    }
+   ],
+   "notte": [
+    {
+     "type": "work",
+     "weight": 5
+    },
+    {
+     "type": "home",
+     "weight": 5
+    }
+   ]
+  },
+  "banchiere": {
+   "pomeriggio": [
+    {
+     "type": "work",
+     "weight": 10
+    }
+   ]
+  },
+  "minatore": {
+   "mattina": [
+    {
+     "type": "work",
+     "weight": 6
+    },
+    {
+     "type": "wander",
+     "weight": 4
+    }
+   ]
+  },
+  "cacciatore": {
+   "mattina": [
+    {
+     "type": "work",
+     "weight": 6
+    },
+    {
+     "type": "wander",
+     "weight": 4
+    }
+   ]
+  },
+  "commerciante": {
+   "mattina": [
+    {
+     "type": "work",
+     "weight": 6
+    },
+    {
+     "type": "wander",
+     "weight": 4
+    }
+   ]
+  },
+  "mercenario": {
+   "mattina": [
+    {
+     "type": "work",
+     "weight": 6
+    },
+    {
+     "type": "wander",
+     "weight": 4
+    }
+   ]
+  }
+ },
+ "activity_labels": {
+  "work": "Sta lavorando",
+  "wander": "Passeggia per la città",
+  "gather": "Chiacchiera davanti al saloon",
+  "saloon": "Si sta godendo una bevuta al saloon",
+  "errand": "Sta sbrigando una commissione",
+  "home": "È a casa"
+ },
+ "idle_stroll": {
+  "enabled": true,
+  "interval": [
+   4,
+   10
+  ],
+  "radius": [
+   20,
+   60
+  ]
+ }
+}

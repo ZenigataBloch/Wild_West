@@ -1,0 +1,1088 @@
+{
+	"reputation_groups": {
+		"cittadini": "Cittadini",
+		"commercianti": "Commercianti",
+		"legge": "Legge",
+		"gang": "Gang"
+	},
+	"info": {
+		"info_bandits": {
+			"title": "Banditi a nord",
+			"text": "Jed Harlan e la sua banda battono le strade a nord della città. Meglio non viaggiare da soli."
+		},
+		"info_wanted_board": {
+			"title": "Bacheca dei ricercati",
+			"text": "Lo sceriffo tiene d'occhio tre fuorilegge: Jed Harlan, Maria la Volpe e Silas Crow."
+		},
+		"info_silas": {
+			"title": "Silas Crow",
+			"text": "Silas Crow è il più pericoloso: lo hanno visto vicino alla vecchia miniera, ma si sposta di notte."
+		},
+		"info_rumor_mine": {
+			"title": "Voce sulla miniera",
+			"text": "Al saloon si dice che qualcuno abbia trovato una vena d'argento nella miniera abbandonata."
+		},
+		"info_bank_hours": {
+			"title": "Orari della banca",
+			"text": "La banca apre dalle 9 alle 17. Fuori orario le porte restano sbarrate."
+		},
+		"info_loans": {
+			"title": "Prestiti in banca",
+			"text": "La banca fa credito in base alla reputazione tra i commercianti e al deposito in cassa. Il tasso segue il mercato. Chi non paga perde il conto e il credito."
+		},
+		"info_robbery_risk": {
+			"title": "Timore di rapina",
+			"text": "Il banchiere teme una rapina: i trasporti di contante arrivano di giovedì."
+		},
+		"info_secret_saloon": {
+			"title": "Il segreto del saloon",
+			"text": "Il barista nasconde casse di whiskey di contrabbando nella cantina del saloon."
+		},
+		"info_mine": {
+			"title": "Miniera pericolosa",
+			"text": "La miniera a ovest è instabile: due uomini sono rimasti feriti la settimana scorsa."
+		},
+		"info_silver": {
+			"title": "Galleria sigillata",
+			"text": "Una galleria sigillata nella miniera potrebbe contenere argento. Il caposquadra non vuole che se ne parli."
+		},
+		"info_hunting": {
+			"title": "Caccia al fiume",
+			"text": "I cervi scendono al fiume all'alba. Il tramonto è l'ora dei coyote."
+		},
+		"info_market": {
+			"title": "Prezzi in città",
+			"text": "I prezzi cambiano con le stagioni e con le carovane in arrivo."
+		},
+		"info_mercenary": {
+			"title": "Tariffe dei mercenari",
+			"text": "I mercenari chiedono circa cento dollari al giorno e non fanno domande."
+		},
+		"info_gang_hint": {
+			"title": "I Corvi",
+			"text": "Una banda chiamata i Corvi controlla le strade a est. Pagano bene chi tace."
+		}
+	},
+	"dialogues": {
+		"generic": {
+			"nodes": {
+				"start": {
+					"text": "Buongiorno, {player}. Non sono molto di parola, ma chiedi pure.",
+					"variants": [
+						{
+							"if": {
+								"min_rel": 30
+							},
+							"text": "Ehi, {player}! Sempre un piacere vederti. Che ti serve?"
+						},
+						{
+							"if": {
+								"max_rel": -20
+							},
+							"text": "Che vuoi? Non ho tempo da perdere con te."
+						}
+					],
+					"choices": [
+						{
+							"text": "Come va in città?",
+							"next": "town"
+						},
+						{
+							"text": "Che lavoro fai?",
+							"next": "job"
+						},
+						{
+							"text": "Ti offro un dollaro per il disturbo.",
+							"if": {
+								"min_money": 1
+							},
+							"once": true,
+							"next": "thanks",
+							"effects": [
+								{
+									"type": "money",
+									"value": -1
+								},
+								{
+									"type": "relationship",
+									"value": 2
+								}
+							]
+						},
+						{
+							"text": "Hai del lavoro per me?",
+							"if": {
+								"quest_available": true
+							},
+							"effects": [
+								{
+									"type": "quest_offer"
+								}
+							],
+							"next": "q_offer"
+						},
+						{
+							"text": "Ho un pacco da consegnarti.",
+							"if": {
+								"quest_ready": "deliver"
+							},
+							"effects": [
+								{
+									"type": "quest_complete",
+									"role": "deliver"
+								}
+							],
+							"next": "q_done"
+						},
+						{
+							"text": "Ho finito il lavoro che mi hai affidato.",
+							"if": {
+								"quest_ready": "report"
+							},
+							"effects": [
+								{
+									"type": "quest_complete",
+									"role": "report"
+								}
+							],
+							"next": "q_done"
+						},
+						{
+							"text": "Arrivederci.",
+							"next": "end"
+						}
+					]
+				},
+				"town": {
+					"text": "Dustwater vive di miniera e bestiame. Finché lo sceriffo tiene a bada i banditi, si campa.",
+					"choices": [
+						{
+							"text": "Si parla di banditi?",
+							"next": "bandits",
+							"effects": [
+								{
+									"type": "info",
+									"id": "info_bandits"
+								}
+							]
+						},
+						{
+							"text": "Grazie, {name}.",
+							"next": "start"
+						}
+					]
+				},
+				"bandits": {
+					"text": "Dicono che Jed Harlan batta le strade a nord. Non andarci da solo.",
+					"choices": [
+						{
+							"text": "Starò attento.",
+							"next": "start"
+						}
+					]
+				},
+				"job": {
+					"text": "Mi guadagno da vivere come {job}. Non è molto, ma è onesto.",
+					"choices": [
+						{
+							"text": "Capisco.",
+							"next": "start"
+						}
+					]
+				},
+				"thanks": {
+					"text": "Gentile da parte tua, {player}. Non lo dimenticherò.",
+					"choices": [
+						{
+							"text": "Figurati.",
+							"next": "start"
+						}
+					]
+				},
+				"q_offer": {
+					"text": "{quest_text} (Ricompensa: {quest_reward})",
+					"choices": [
+						{
+							"text": "Accetto l'incarico.",
+							"effects": [
+								{
+									"type": "quest_accept"
+								}
+							],
+							"next": "q_accepted"
+						},
+						{
+							"text": "Non ora, grazie.",
+							"effects": [
+								{
+									"type": "quest_decline"
+								}
+							],
+							"next": "end"
+						}
+					]
+				},
+				"q_accepted": {
+					"text": "Bene, {player}. Conto su di te. {quest_hint}",
+					"choices": [
+						{
+							"text": "Arrivederci.",
+							"next": "end"
+						}
+					]
+				},
+				"q_done": {
+					"text": "Perfetto, {player}. Ecco quanto pattuito.",
+					"choices": [
+						{
+							"text": "Grazie.",
+							"next": "end"
+						}
+					]
+				}
+			}
+		},
+		"sceriffo": {
+			"nodes": {
+				"start": {
+					"text": "Sono lo sceriffo di Dustwater. Tieni le mani lontane dalle pistole e ci intenderemo.",
+					"variants": [
+						{
+							"if": {
+								"min_rel": 30
+							},
+							"text": "{player}! Un cittadino onesto. Dimmi, cosa ti porta qui?"
+						},
+						{
+							"if": {
+								"max_rel": -20
+							},
+							"text": "Ti tengo d'occhio, {player}. Un passo falso e finisci in cella."
+						}
+					],
+					"choices": [
+						{
+							"text": "Chi sono i ricercati?",
+							"next": "wanted",
+							"effects": [
+								{
+									"type": "info",
+									"id": "info_wanted_board"
+								}
+							]
+						},
+						{
+							"text": "Sai qualcosa su Silas Crow?",
+							"if": {
+								"min_rel": 20
+							},
+							"show_locked": true,
+							"once": true,
+							"next": "silas",
+							"effects": [
+								{
+									"type": "info",
+									"id": "info_silas"
+								},
+								{
+									"type": "relationship",
+									"value": 2
+								}
+							]
+						},
+						{
+							"text": "Posso aiutare la legge?",
+							"next": "help"
+						},
+						{
+							"text": "Hai del lavoro per me?",
+							"if": {
+								"quest_available": true
+							},
+							"effects": [
+								{
+									"type": "quest_offer"
+								}
+							],
+							"next": "q_offer"
+						},
+						{
+							"text": "Ho un pacco da consegnarti.",
+							"if": {
+								"quest_ready": "deliver"
+							},
+							"effects": [
+								{
+									"type": "quest_complete",
+									"role": "deliver"
+								}
+							],
+							"next": "q_done"
+						},
+						{
+							"text": "Ho finito il lavoro che mi hai affidato.",
+							"if": {
+								"quest_ready": "report"
+							},
+							"effects": [
+								{
+									"type": "quest_complete",
+									"role": "report"
+								}
+							],
+							"next": "q_done"
+						},
+						{
+							"text": "Salve, sceriffo.",
+							"next": "end"
+						}
+					]
+				},
+				"wanted": {
+					"text": "Jed Harlan, Maria la Volpe e Silas Crow. La bacheca qui fuori ha i manifesti. Chi li porta da me riceve la taglia.",
+					"choices": [
+						{
+							"text": "Intesi.",
+							"next": "start"
+						}
+					]
+				},
+				"silas": {
+					"text": "Parlo solo con chi mi ispira fiducia. Silas si nasconde vicino alla vecchia miniera e si muove di notte. Non farti vedere.",
+					"choices": [
+						{
+							"text": "Grazie, sceriffo.",
+							"next": "start"
+						}
+					]
+				},
+				"help": {
+					"text": "Per ora ho tutto sotto controllo. Ma una città come questa avrà presto bisogno di gente in gamba. Torna a trovarmi.",
+					"choices": [
+						{
+							"text": "Conta su di me.",
+							"once": true,
+							"next": "start",
+							"effects": [
+								{
+									"type": "reputation",
+									"group": "legge",
+									"value": 1
+								}
+							]
+						},
+						{
+							"text": "Ci penserò.",
+							"next": "start"
+						}
+					]
+				}
+			}
+		},
+		"barista": {
+			"nodes": {
+				"start": {
+					"text": "Che ti servo, straniero? Qui si beve e si ascolta.",
+					"variants": [
+						{
+							"if": {
+								"min_rel": 30
+							},
+							"text": "{player}! Il solito? O stasera hai voglia di chiacchierare?"
+						}
+					],
+					"choices": [
+						{
+							"text": "Cosa si dice in giro?",
+							"next": "rumors",
+							"effects": [
+								{
+									"type": "info",
+									"id": "info_rumor_mine"
+								}
+							]
+						},
+						{
+							"text": "Offro un giro a tutti ($5).",
+							"if": {
+								"min_money": 5
+							},
+							"show_locked": true,
+							"once": true,
+							"next": "round",
+							"effects": [
+								{
+									"type": "money",
+									"value": -5
+								},
+								{
+									"type": "relationship",
+									"value": 8
+								},
+								{
+									"type": "reputation",
+									"group": "cittadini",
+									"value": 2
+								}
+							]
+						},
+						{
+							"text": "Hai qualche segreto da svelare?",
+							"if": {
+								"min_rel": 25
+							},
+							"show_locked": true,
+							"once": true,
+							"next": "secret",
+							"effects": [
+								{
+									"type": "info",
+									"id": "info_secret_saloon"
+								},
+								{
+									"type": "relationship",
+									"value": 2
+								}
+							]
+						},
+						{
+							"text": "Hai del lavoro per me?",
+							"if": {
+								"quest_available": true
+							},
+							"effects": [
+								{
+									"type": "quest_offer"
+								}
+							],
+							"next": "q_offer"
+						},
+						{
+							"text": "Ho un pacco da consegnarti.",
+							"if": {
+								"quest_ready": "deliver"
+							},
+							"effects": [
+								{
+									"type": "quest_complete",
+									"role": "deliver"
+								}
+							],
+							"next": "q_done"
+						},
+						{
+							"text": "Ho finito il lavoro che mi hai affidato.",
+							"if": {
+								"quest_ready": "report"
+							},
+							"effects": [
+								{
+									"type": "quest_complete",
+									"role": "report"
+								}
+							],
+							"next": "q_done"
+						},
+						{
+							"text": "Niente per ora.",
+							"next": "end"
+						}
+					]
+				},
+				"rumors": {
+					"text": "Beh, dicono che qualcuno abbia trovato una vena d'argento nella miniera abbandonata. Io non ci credo, ma i minatori bevono più del solito.",
+					"choices": [
+						{
+							"text": "Interessante.",
+							"next": "start"
+						}
+					]
+				},
+				"round": {
+					"text": "Un giro per tutti! Stasera il saloon ricorderà il tuo nome, {player}.",
+					"choices": [
+						{
+							"text": "Alla salute!",
+							"next": "start"
+						}
+					]
+				},
+				"secret": {
+					"text": "Parlo piano: in cantina c'è whiskey che lo sceriffo non deve vedere. Se ne parli, ti nego anche l'acqua.",
+					"choices": [
+						{
+							"text": "Le mie labbra sono sigillate.",
+							"next": "start"
+						}
+					]
+				}
+			}
+		},
+		"banchiere": {
+			"nodes": {
+				"start": {
+					"text": "Benvenuto alla Banca di Dustwater. Posso fare qualcosa per lei?",
+					"variants": [
+						{
+							"if": {
+								"overdue": true
+							},
+							"text": "Signor {player}, il suo debito con la banca è scaduto. Spero abbia buone notizie."
+						},
+						{
+							"if": {
+								"min_rel": 30
+							},
+							"text": "Signor {player}, la stavo aspettando. In cosa posso esserle utile?"
+						}
+					],
+					"choices": [
+						{
+							"text": "Come funziona la banca?",
+							"next": "bank",
+							"effects": [
+								{
+									"type": "info",
+									"id": "info_bank_hours"
+								}
+							]
+						},
+						{
+							"text": "Fate prestiti?",
+							"next": "loans",
+							"effects": [
+								{
+									"type": "info",
+									"id": "info_loans"
+								}
+							]
+						},
+						{
+							"text": "Parliamo del mio debito.",
+							"if": {
+								"debt": true
+							},
+							"next": "debt"
+						},
+						{
+							"text": "Qualche pensiero per la sicurezza?",
+							"if": {
+								"min_rel": 15
+							},
+							"show_locked": true,
+							"once": true,
+							"next": "robbery",
+							"effects": [
+								{
+									"type": "info",
+									"id": "info_robbery_risk"
+								},
+								{
+									"type": "reputation",
+									"group": "commercianti",
+									"value": 1
+								}
+							]
+						},
+						{
+							"text": "Hai del lavoro per me?",
+							"if": {
+								"quest_available": true
+							},
+							"effects": [
+								{
+									"type": "quest_offer"
+								}
+							],
+							"next": "q_offer"
+						},
+						{
+							"text": "Ho un pacco da consegnarti.",
+							"if": {
+								"quest_ready": "deliver"
+							},
+							"effects": [
+								{
+									"type": "quest_complete",
+									"role": "deliver"
+								}
+							],
+							"next": "q_done"
+						},
+						{
+							"text": "Ho finito il lavoro che mi hai affidato.",
+							"if": {
+								"quest_ready": "report"
+							},
+							"effects": [
+								{
+									"type": "quest_complete",
+									"role": "report"
+								}
+							],
+							"next": "q_done"
+						},
+						{
+							"text": "Buona giornata.",
+							"next": "end"
+						}
+					]
+				},
+				"bank": {
+					"text": "Siamo aperti dalle nove alle cinque. Depositi sicuri e prelievi in qualsiasi momento, durante l'orario.",
+					"choices": [
+						{
+							"text": "Chiaro.",
+							"next": "start"
+						}
+					]
+				},
+				"loans": {
+					"text": "Un prestito? Il fido dipende dalla reputazione tra i commercianti e dal deposito che tiene in cassa, che vale come garanzia. Il tasso segue il mercato. Se non paga, ci rivarremo sul suo conto.",
+					"choices": [
+						{
+							"text": "Capisco.",
+							"next": "start"
+						}
+					]
+				},
+				"robbery": {
+					"text": "Tra noi: i trasporti di contante arrivano di giovedì. Con i tempi che corrono, mi sento esposto.",
+					"choices": [
+						{
+							"text": "Terrò gli occhi aperti.",
+							"next": "start"
+						}
+					]
+				},
+				"debt": {
+					"text": "Mi risulta che lei debba ${debt} alla banca. Può saldare al banco quando vuole: dopo la scadenza ogni giorno di ritardo costa caro e, passati cinque giorni, ci rivarremo sul suo conto.",
+					"choices": [
+						{
+							"text": "Capisco.",
+							"next": "start"
+						}
+					]
+				}
+			}
+		},
+		"minatore": {
+			"nodes": {
+				"start": {
+					"text": "Giornata dura giù in miniera. Se vuoi parlare, fallo mentre respiro ancora.",
+					"variants": [
+						{
+							"if": {
+								"min_rel": 30
+							},
+							"text": "{player}! Per te ho sempre tempo, anche con la polvere nei polmoni."
+						}
+					],
+					"choices": [
+						{
+							"text": "Com'è la miniera?",
+							"next": "mine",
+							"effects": [
+								{
+									"type": "info",
+									"id": "info_mine"
+								}
+							]
+						},
+						{
+							"text": "Si parla di una vena d'argento.",
+							"if": {
+								"min_rel": 30
+							},
+							"show_locked": true,
+							"once": true,
+							"next": "silver",
+							"effects": [
+								{
+									"type": "info",
+									"id": "info_silver"
+								},
+								{
+									"type": "relationship",
+									"value": 2
+								}
+							]
+						},
+						{
+							"text": "Hai del lavoro per me?",
+							"if": {
+								"quest_available": true
+							},
+							"effects": [
+								{
+									"type": "quest_offer"
+								}
+							],
+							"next": "q_offer"
+						},
+						{
+							"text": "Ho un pacco da consegnarti.",
+							"if": {
+								"quest_ready": "deliver"
+							},
+							"effects": [
+								{
+									"type": "quest_complete",
+									"role": "deliver"
+								}
+							],
+							"next": "q_done"
+						},
+						{
+							"text": "Ho finito il lavoro che mi hai affidato.",
+							"if": {
+								"quest_ready": "report"
+							},
+							"effects": [
+								{
+									"type": "quest_complete",
+									"role": "report"
+								}
+							],
+							"next": "q_done"
+						},
+						{
+							"text": "Buon lavoro.",
+							"next": "end"
+						}
+					]
+				},
+				"mine": {
+					"text": "Instabile. Due compagni si sono fatti male la settimana scorsa. Ci vorrebbero più puntelli, ma la compagnia non spende.",
+					"choices": [
+						{
+							"text": "Mi dispiace.",
+							"next": "start"
+						}
+					]
+				},
+				"silver": {
+					"text": "Zitto, parla piano. C'è una galleria sigillata. Il caposquadra non vuole che se ne parli. Io non ti ho detto niente.",
+					"choices": [
+						{
+							"text": "Mai sentito niente.",
+							"next": "start"
+						}
+					]
+				}
+			}
+		},
+		"cacciatore": {
+			"nodes": {
+				"start": {
+					"text": "Silenzio, straniero: stai spaventando la selvaggina. Poi dimmi che vuoi.",
+					"variants": [
+						{
+							"if": {
+								"min_rel": 30
+							},
+							"text": "{player}, giusto in tempo. Ho tracce fresche vicino al fiume."
+						}
+					],
+					"choices": [
+						{
+							"text": "Dove si caccia meglio?",
+							"next": "hunt",
+							"effects": [
+								{
+									"type": "info",
+									"id": "info_hunting"
+								}
+							]
+						},
+						{
+							"text": "Bella pelle di cervo. Quanto ne ricavi?",
+							"next": "pelts"
+						},
+						{
+							"text": "Hai del lavoro per me?",
+							"if": {
+								"quest_available": true
+							},
+							"effects": [
+								{
+									"type": "quest_offer"
+								}
+							],
+							"next": "q_offer"
+						},
+						{
+							"text": "Ho un pacco da consegnarti.",
+							"if": {
+								"quest_ready": "deliver"
+							},
+							"effects": [
+								{
+									"type": "quest_complete",
+									"role": "deliver"
+								}
+							],
+							"next": "q_done"
+						},
+						{
+							"text": "Ho finito il lavoro che mi hai affidato.",
+							"if": {
+								"quest_ready": "report"
+							},
+							"effects": [
+								{
+									"type": "quest_complete",
+									"role": "report"
+								}
+							],
+							"next": "q_done"
+						},
+						{
+							"text": "Buona caccia.",
+							"next": "end"
+						}
+					]
+				},
+				"hunt": {
+					"text": "Al fiume, all'alba: i cervi scendono a bere. Al tramonto invece escono i coyote, e quelli mordono.",
+					"choices": [
+						{
+							"text": "Grazie del consiglio.",
+							"next": "start"
+						}
+					]
+				},
+				"pelts": {
+					"text": "Poco, se le vendo a un commerciante che mi frega. Il mestiere è duro.",
+					"choices": [
+						{
+							"text": "Capisco.",
+							"next": "start"
+						}
+					]
+				}
+			}
+		},
+		"commerciante": {
+			"nodes": {
+				"start": {
+					"text": "Benvenuto, cliente! Se hai soldi, ho merce. Se non ne hai, ho ottimi consigli.",
+					"variants": [
+						{
+							"if": {
+								"min_rel": 30
+							},
+							"text": "{player}, il mio cliente preferito! Per te, uno sconto... a parole."
+						}
+					],
+					"choices": [
+						{
+							"text": "Come vanno gli affari?",
+							"next": "market",
+							"effects": [
+								{
+									"type": "info",
+									"id": "info_market"
+								}
+							]
+						},
+						{
+							"text": "Parlerò bene del tuo negozio in giro.",
+							"if": {
+								"stat": "carisma",
+								"min": 5
+							},
+							"show_locked": true,
+							"once": true,
+							"next": "praise",
+							"effects": [
+								{
+									"type": "relationship",
+									"value": 5
+								},
+								{
+									"type": "reputation",
+									"group": "commercianti",
+									"value": 2
+								}
+							]
+						},
+						{
+							"text": "Hai del lavoro per me?",
+							"if": {
+								"quest_available": true
+							},
+							"effects": [
+								{
+									"type": "quest_offer"
+								}
+							],
+							"next": "q_offer"
+						},
+						{
+							"text": "Ho un pacco da consegnarti.",
+							"if": {
+								"quest_ready": "deliver"
+							},
+							"effects": [
+								{
+									"type": "quest_complete",
+									"role": "deliver"
+								}
+							],
+							"next": "q_done"
+						},
+						{
+							"text": "Ho finito il lavoro che mi hai affidato.",
+							"if": {
+								"quest_ready": "report"
+							},
+							"effects": [
+								{
+									"type": "quest_complete",
+									"role": "report"
+								}
+							],
+							"next": "q_done"
+						},
+						{
+							"text": "Arrivederci.",
+							"next": "end"
+						}
+					]
+				},
+				"market": {
+					"text": "I prezzi vanno e vengono con le stagioni e con le carovane. Quando arriva una carovana, si fanno affari.",
+					"choices": [
+						{
+							"text": "Buono a sapersi.",
+							"next": "start"
+						}
+					]
+				},
+				"praise": {
+					"text": "Che gentile! La parola giusta vale più di un annuncio sul giornale.",
+					"choices": [
+						{
+							"text": "Un piacere.",
+							"next": "start"
+						}
+					]
+				}
+			}
+		},
+		"mercenario": {
+			"nodes": {
+				"start": {
+					"text": "Lavoro per chi paga meglio. Hai qualcosa da offrire?",
+					"variants": [
+						{
+							"if": {
+								"min_rel": 30
+							},
+							"text": "{player}. Tu almeno non sprechi il mio tempo. Che c'è?"
+						},
+						{
+							"if": {
+								"max_rel": -20
+							},
+							"text": "Stammi lontano, {player}. I miei amici non gradiscono."
+						}
+					],
+					"choices": [
+						{
+							"text": "Quanto chiedi per un lavoro?",
+							"next": "price",
+							"effects": [
+								{
+									"type": "info",
+									"id": "info_mercenary"
+								}
+							]
+						},
+						{
+							"text": "Per chi hai lavorato?",
+							"if": {
+								"min_rel": 20
+							},
+							"show_locked": true,
+							"once": true,
+							"next": "gang",
+							"effects": [
+								{
+									"type": "info",
+									"id": "info_gang_hint"
+								},
+								{
+									"type": "reputation",
+									"group": "gang",
+									"value": 1
+								}
+							]
+						},
+						{
+							"text": "Hai del lavoro per me?",
+							"if": {
+								"quest_available": true
+							},
+							"effects": [
+								{
+									"type": "quest_offer"
+								}
+							],
+							"next": "q_offer"
+						},
+						{
+							"text": "Ho un pacco da consegnarti.",
+							"if": {
+								"quest_ready": "deliver"
+							},
+							"effects": [
+								{
+									"type": "quest_complete",
+									"role": "deliver"
+								}
+							],
+							"next": "q_done"
+						},
+						{
+							"text": "Ho finito il lavoro che mi hai affidato.",
+							"if": {
+								"quest_ready": "report"
+							},
+							"effects": [
+								{
+									"type": "quest_complete",
+									"role": "report"
+								}
+							],
+							"next": "q_done"
+						},
+						{
+							"text": "Niente per ora.",
+							"next": "end"
+						}
+					]
+				},
+				"price": {
+					"text": "Cento dollari al giorno. E non faccio domande, né accetto prediche.",
+					"choices": [
+						{
+							"text": "Vedrò.",
+							"next": "start"
+						}
+					]
+				},
+				"gang": {
+					"text": "Ho ricevuto offerte dai Corvi, la banda che controlla le strade a est. Pagano bene chi tace. Io ho rifiutato. Per ora.",
+					"choices": [
+						{
+							"text": "Interessante.",
+							"next": "start"
+						}
+					]
+				}
+			}
+		}
+	}
+}

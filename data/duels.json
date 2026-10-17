@@ -1,0 +1,152 @@
+{
+  "noon_hour": 12,
+  "street": "Strada principale",
+  "timing": {
+    "cue_min": 1.6,
+    "cue_max": 4.4,
+    "react_window_ms": 1400,
+    "agility_ms_bonus": 10,
+    "aim_ms_bonus": 4,
+    "intro_seconds": 2.4,
+    "event_seconds": 1.0
+  },
+  "opponent_draw": {
+    "base_ms": 380,
+    "agility_ms": -14,
+    "aim_ms": -6,
+    "fame_ms": -8,
+    "noise_ms": 70,
+    "min_ms": 170
+  },
+  "hit": {
+    "base": 0.32,
+    "per_aim": 0.05,
+    "per_opp_agility": 0.02,
+    "first_shot_bonus": 0.15,
+    "foul_penalty": 0.2,
+    "min": 0.1,
+    "max": 0.92
+  },
+  "shots_each": 4,
+  "melee_types": ["lama", "contundente"],
+  "damage": {
+    "fallback": [6, 12],
+    "opponent": [6, 11],
+    "opponent_per_fame": 0.5
+  },
+  "pools": {
+    "player_base": 22,
+    "player_per_resistenza": 2,
+    "player_health_floor": 5,
+    "opponent_base": 14,
+    "opponent_per_resistenza": 2
+  },
+  "stakes": {
+    "min": 10,
+    "max": 60,
+    "per_fame": 4,
+    "money_cap_ratio": 0.5,
+    "min_money_to_bet": 20
+  },
+  "audience": {
+    "street_radius": 500,
+    "passers_min": 0,
+    "passers_max": 2,
+    "noon_bonus": 2,
+    "noon_window": [11, 14],
+    "max_drawn": 16,
+    "rep_per_spectator": 0.08,
+    "fame_rep_per_point": 0.07
+  },
+  "reputation": {
+    "win": { "cittadini": 5, "commercianti": 2, "gang": 6, "legge": 1 },
+    "win_foul": { "cittadini": -12, "commercianti": -4, "gang": 2, "legge": -12 },
+    "lose": { "cittadini": -2, "gang": -4 },
+    "lose_foul": { "cittadini": -6, "legge": -3, "gang": -6 },
+    "draw": { "cittadini": 1, "gang": -1 },
+    "refuse": { "cittadini": -4, "gang": -8 },
+    "sheriff_foul_extra": { "legge": -6 },
+    "sheriff_fair_win_extra": { "legge": 2 }
+  },
+  "relationship": {
+    "win": -12,
+    "lose": 4,
+    "draw": 2,
+    "refuse": -6
+  },
+  "jobs": {
+    "default": { "fame": 2, "can_duel": true },
+    "mercenario": { "fame": 7, "can_duel": true },
+    "cacciatore": { "fame": 4, "can_duel": true },
+    "minatore": { "fame": 2, "can_duel": true },
+    "barista": { "fame": 2, "can_duel": true },
+    "commerciante": { "fame": 1, "can_duel": true },
+    "banchiere": { "fame": 1, "can_duel": true },
+    "sceriffo": { "fame": 9, "can_duel": false }
+  },
+  "strangers": {
+    "names": ["Jack", "Wyatt", "Silas", "Cole", "Boone", "Dutch", "Hank", "Eli", "Rafe", "Gideon"],
+    "surnames": ["Dunn", "Harlan", "Creed", "Ketchum", "Mercer", "Blackwood", "Slade", "Tolliver"],
+    "nicknames": ["Occhio Freddo", "Mano Rapida", "Il Corvo", "Sei Colpi", "Polvere", "Il Predicatore"],
+    "fame_min": 4,
+    "fame_max": 9,
+    "stat_base": 4
+  },
+  "random_challenge": {
+    "enabled": true,
+    "min_fame": 15,
+    "base_chance": 0.15,
+    "fame_chance": 0.5,
+    "cooldown_days": 3,
+    "town_radius": 600
+  },
+  "text": {
+    "challenge": "{opp} ti sfida a duello a mezzogiorno, sulla {street}.",
+    "challenge_info": "Posta: ${stake}. Spettatori attesi: circa {audience}.",
+    "challenge_sheriff": "Lo sceriffo è in città e vedrà tutto.",
+    "no_weapon": "Non hai un'arma da fuoco in mano: non puoi accettare.",
+    "refuse_hint": "Rifiutare costa reputazione.",
+    "intro_before": "Accetti. Le campane battono mezzogiorno e la gente si raduna sulla strada...",
+    "intro_after": "Accetti. Il sole è alto sulla strada e la gente si raduna...",
+    "standoff": "Mani sui calci. Aspetta il segnale... non sparare prima!",
+    "cue": "SPARA!",
+    "cue_hint": "Spazio o clic!",
+    "foul": "Hai estratto prima del segnale!",
+    "slow": "Troppo lento: ti sei mosso solo quando era tardi.",
+    "reaction": "Tua reazione: {p} ms — {opp}: {o} ms",
+    "player_first": "Sei più rapido: estrai per primo!",
+    "opp_first": "{opp} è più rapido: estrae per primo!",
+    "foul_first": "Hai sparato troppo presto, di certo non è leale!",
+    "player_hit": [
+      "Fai fuoco con {weapon} e centri {opp}!",
+      "Il tuo colpo parte netto: {opp} vacilla.",
+      "{weapon} rimbalza in mano e {opp} è colpito."
+    ],
+    "player_miss": [
+      "Il tuo colpo fischia a un soffio da {opp}.",
+      "Spari e manchi: la polvere schizza dietro di lui.",
+      "Il proiettile si pianta in una trave."
+    ],
+    "opp_hit": [
+      "{opp} spara e ti prende!",
+      "Una fitta: il colpo di {opp} va a segno.",
+      "Il piombo di {opp} ti sfiora la carne e brucia."
+    ],
+    "opp_miss": [
+      "{opp} spara, ma il colpo si perde nella polvere.",
+      "Il proiettile di {opp} ti sfiora il cappello.",
+      "{opp} manca il bersaglio."
+    ],
+    "opp_down": "{opp} crolla in ginocchio. Il duello è finito.",
+    "player_down": "Ti piegano le gambe: sei a terra. Il duello è finito.",
+    "draw_end": "Nessuno cade. Le armi si abbassano: finisce in parità.",
+    "result_win": "Hai vinto il duello!",
+    "result_win_foul": "Hai vinto, ma sparando prima del segnale: nessuno ti rispetta per questo.",
+    "result_lose": "Hai perso il duello.",
+    "result_lose_foul": "Hai perso, e per giunta con un colpo scorretto.",
+    "result_draw": "Il duello finisce in parità.",
+    "result_refuse": "Hai rifiutato la sfida: qualcuno sghignazza.",
+    "sheriff_foul": "Lo sceriffo ha visto la scorrettezza.",
+    "sheriff_fair": "Lo sceriffo annuisce: duello leale."
+  }
+}

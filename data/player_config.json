@@ -17,8 +17,11 @@
     "carisma":    { "label": "Carisma",    "base": 3 },
     "resistenza": { "label": "Resistenza", "base": 3 }
   },
+  "start_weapon": "revolver_usato",
   "start_items": [
+    { "id": "revolver_usato", "qty": 1 },
     { "id": "razione", "qty": 3 },
+    { "id": "bende", "qty": 2 },
     { "id": "borraccia", "qty": 1 },
     { "id": "fiammiferi", "qty": 1 }
   ]

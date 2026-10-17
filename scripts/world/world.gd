@@ -2,7 +2,10 @@ extends Node2D
 ## Scena principale: genera la città e il paesaggio, ospita giocatore, HUD e ciclo giorno/notte.
 ## Comandi: WASD/frecce muovi, Shift corri, E interagisci, rotella zoom, I scheda personaggio.
 ## Debug: R nuova partita, 1/2/3/4 velocità tempo, Spazio pausa,
-##        H -10 salute, J +10 salute, K +10 soldi, B aggiunge bende.
+##        X combattimento di prova (fuori città scattano imboscate casuali),
+##        H -10 salute, J +10 salute, K +10 soldi, B aggiunge bende, G regala un'arma casuale,
+##        V ti infligge una ferita casuale, T una sfida a duello,
+##        L pannello dei lavori, M pannello del mercato.
 
 const CONFIG_PATH := "res://data/world_config.json"
 const AvatarScript := preload("res://scripts/player/player_avatar.gd")
@@ -20,6 +23,15 @@ var _town_cfg: Dictionary = {}
 var _modulate: CanvasModulate
 var _info: Label
 var _town_root: Node2D
+var _buildings: BuildingManager
+var _npcs: NPCManager
+var _quests: QuestManager
+var _combat: CombatManager
+var _wounds: WoundManager
+var _duels: DuelManager
+var _jobs: JobManager
+var _economy: EconomyManager
+var _bank: BankManager
 
 func _ready() -> void:
 	var f := FileAccess.open(CONFIG_PATH, FileAccess.READ)
@@ -31,6 +43,8 @@ func _ready() -> void:
 	add_child(_modulate)
 
 	avatar = AvatarScript.new()
+	avatar.name = "Player"
+	avatar.add_to_group("player")
 	add_child(avatar)
 
 	var layer := CanvasLayer.new()
@@ -46,6 +60,7 @@ func _ready() -> void:
 
 	var hud = HudScript.new()
 	add_child(hud)
+	add_child(ReputationManager.new())
 	_prompt_hud = PromptScript.new()
 	add_child(_prompt_hud)
 
@@ -61,6 +76,8 @@ func _new_game(forced_seed: int) -> void:
 	WorldSeed.new_game(forced_seed)
 	GameTime.reset()
 	PlayerState.new_character()
+	DialogueState.reset()
+	BuildingActions.reset()
 	town = TownGenerator.generate(_town_cfg)
 	scenery = SceneryGenerator.generate(_world_cfg, town)
 
@@ -73,15 +90,73 @@ func _new_game(forced_seed: int) -> void:
 	avatar.setup(bounds, origin)
 	queue_redraw()
 
-# Lotti solidi + punti interattivi (segnaposto: la Feature 5 li sostituirà con gli edifici).
+# Lotti solidi, edifici (Feature 5), NPC (Feature 6-8); segnaposto solo sui lotti ancora liberi.
 func _build_town_nodes() -> void:
 	if _town_root != null:
 		_town_root.queue_free()
 	_town_root = Node2D.new()
 	add_child(_town_root)
+
+	var rects: Array[Rect2] = []
 	for lot in town["lots"]:
 		var r: Array = lot["rect"]
-		var rect := Rect2(r[0], r[1], r[2], r[3])
+		rects.append(Rect2(r[0], r[1], r[2], r[3]))
+
+	var st: Array = town["street"]
+	_buildings = BuildingManager.new()
+	_buildings.street_y = st[1] + st[3] * 0.5
+	_town_root.add_child(_buildings)
+	_buildings.spawn(rects)
+
+	_npcs = NPCManager.new()
+	_town_root.add_child(_npcs)
+	_npcs.spawn(_buildings.buildings, _buildings.street_y)
+
+	_quests = QuestManager.new()
+	_town_root.add_child(_quests)
+	_quests.message.connect(_prompt_hud.show_message)
+	_quests.setup(avatar, bounds, Vector2(town["origin"][0], town["origin"][1]), rects)
+
+	_combat = CombatManager.new()
+	_town_root.add_child(_combat)
+	_combat.message.connect(_prompt_hud.show_message)
+	_combat.setup(avatar, Vector2(town["origin"][0], town["origin"][1]))
+	_quests.set_combat(_combat)
+
+	_wounds = WoundManager.new()
+	_town_root.add_child(_wounds)
+	_wounds.message.connect(_prompt_hud.show_message)
+	_wounds.setup(avatar, Vector2(town["origin"][0], town["origin"][1]))
+
+	_duels = DuelManager.new()
+	_town_root.add_child(_duels)
+	_duels.message.connect(_prompt_hud.show_message)
+	_duels.setup(avatar, Vector2(town["origin"][0], town["origin"][1]))
+	_npcs.duel_requested.connect(func(id: String): _duels.challenge_npc(id))
+
+	_jobs = JobManager.new()
+	_town_root.add_child(_jobs)
+	_jobs.message.connect(_prompt_hud.show_message)
+	_jobs.setup(avatar, Vector2(town["origin"][0], town["origin"][1]), _combat)
+	_economy = EconomyManager.new()
+	_town_root.add_child(_economy)
+	_economy.message.connect(_prompt_hud.show_message)
+	_economy.setup()
+	_bank = BankManager.new()
+	_town_root.add_child(_bank)
+	_bank.message.connect(_prompt_hud.show_message)
+
+	var avoid: Array[Rect2] = rects.duplicate()
+	avoid.append(Rect2(st[0], st[1], st[2], st[3]))
+	_jobs.set_world(_buildings.buildings, bounds, avoid)
+
+	var used: Array[Rect2] = []
+	for b in _buildings.buildings:
+		used.append(b["rect"])
+
+	for i in town["lots"].size():
+		var lot: Dictionary = town["lots"][i]
+		var rect: Rect2 = rects[i]
 
 		var body := StaticBody2D.new()
 		body.position = rect.get_center()
@@ -92,9 +167,11 @@ func _build_town_nodes() -> void:
 		body.add_child(shape)
 		_town_root.add_child(body)
 
+		if used.has(rect):
+			continue
 		var it := Interactable.new()
 		it.prompt = "Esamina il lotto"
-		it.message = "Lotto %d (%s): terreno libero, qui sorgerà un edificio." % [lot["id"], lot["side"]]
+		it.message = "Lotto %d (%s): terreno libero." % [lot["id"], lot["side"]]
 		var edge_y: float = rect.end.y + 30.0 if lot["side"] == "nord" else rect.position.y - 30.0
 		it.position = Vector2(rect.get_center().x, edge_y)
 		it.interacted.connect(_on_interacted.bind(it))
@@ -105,7 +182,7 @@ func _on_interacted(it: Interactable) -> void:
 
 func _process(_d: float) -> void:
 	_modulate.color = GameTime.get_light_color()
-	_info.text = "%s  |  Giorno %d  %s  (%s)  |  seed %d  |  x%.0f  |  WASD muovi, Shift corri, E interagisci" % [
+	_info.text = "%s  |  Giorno %d  %s  (%s)  |  seed %d  |  x%.0f  |  WASD muovi, Shift corri, E interagisci, L lavoro, M mercato" % [
 		town.get("name", "?"), GameTime.day, GameTime.get_time_string(),
 		GameTime.phase, WorldSeed.world_seed, GameTime.time_scale]
 
@@ -123,6 +200,18 @@ func _unhandled_key_input(e: InputEvent) -> void:
 		KEY_J: PlayerState.heal(10)
 		KEY_K: PlayerState.add_money(10)
 		KEY_B: PlayerState.add_item("bende", 1)
+		KEY_V:
+			var rv := RandomNumberGenerator.new()
+			rv.randomize()
+			var vw := WoundSystem.random_wound(rv)
+			if not vw.is_empty():
+				_prompt_hud.show_message("Debug: %s" % WoundSystem.wound_name(vw))
+		KEY_G:
+			var r := RandomNumberGenerator.new()
+			r.randomize()
+			var wid := WeaponDB.random_id(r)
+			if wid != "" and PlayerState.add_item(wid, 1) == 0:
+				_prompt_hud.show_message("Debug: %s (%s)" % [WeaponDB.name_of(wid), WeaponDB.rarity_label(wid)])
 
 # Rendering segnaposto: la grafica vera arriva con la Feature 4.
 func _draw() -> void:

@@ -1,0 +1,74 @@
+{
+	"hit_base_ranged": 0.6,
+	"hit_base_melee": 0.68,
+	"hit_per_point": 0.04,
+	"hit_min": 0.1,
+	"hit_max": 0.95,
+	"cover_penalty": 0.25,
+	"crit_chance": 0.1,
+	"crit_mult": 1.5,
+	"resist_divisor": 3,
+	"bandage_heal": 25,
+	"flee_base": 0.4,
+	"flee_per_point": 0.06,
+	"lose_hp": 10,
+	"lose_money_fraction": 0.5,
+	"wake_hour": 7,
+	"punch": {"dmg": [2, 5]},
+	"_weapons": "Le armi stanno in data/weapons.json; qui resta solo il danno a mani nude (punch).",
+	"actions": {
+		"shoot": {"label": "Spara", "hint": "A distanza: usa la Mira"},
+		"punch": {"label": "Pugno", "hint": "Corpo a corpo: usa la Forza"},
+		"cover": {"label": "Ripararsi", "hint": "Il prossimo attacco nemico è meno preciso"},
+		"bandage": {"label": "Bende", "hint": "Usa una benda per recuperare salute"},
+		"flee": {"label": "Fuggi", "hint": "Dipende dall'Agilità"}
+	},
+	"enemies": {
+		"bandito": {
+			"label": "Bandito", "hp": 28,
+			"stats": {"forza": 3, "mira": 3, "agilita": 2, "resistenza": 2},
+			"attack": {"label": "spara", "kind": "ranged", "dmg": [4, 8]},
+			"loot": [4, 14], "rep": {"group": "legge", "value": 1},
+			"weapon_drop": {"chance": 0.2, "pool": ["revolver_usato", "colt_navy", "coltello", "mazza", "schofield", "winchester", "doppietta"]}
+		},
+		"bandito_capo": {
+			"label": "Capobanda", "hp": 45,
+			"stats": {"forza": 4, "mira": 5, "agilita": 3, "resistenza": 4},
+			"attack": {"label": "fa fuoco", "kind": "ranged", "dmg": [6, 11]},
+			"loot": [15, 35], "rep": {"group": "legge", "value": 2},
+			"weapon_drop": {"chance": 0.5, "pool": ["colt_navy", "schofield", "winchester", "doppietta", "sharps", "peacemaker", "tomahawk", "giustiziere"]}
+		},
+		"coyote": {
+			"label": "Coyote", "hp": 14,
+			"stats": {"forza": 3, "mira": 0, "agilita": 4, "resistenza": 1},
+			"attack": {"label": "morde", "kind": "melee", "dmg": [3, 6]},
+			"loot": [0, 0]
+		},
+		"cervo": {
+			"label": "Cervo", "hp": 18, "stats": {"forza": 3, "mira": 0, "agilita": 6, "resistenza": 1},
+			"attack": {"label": "scalcia", "kind": "melee", "dmg": [2, 4]}, "loot": [0, 0]
+		},
+		"lepre": {
+			"label": "Lepre", "hp": 5, "stats": {"forza": 1, "mira": 0, "agilita": 8, "resistenza": 0},
+			"attack": {"label": "graffia", "kind": "melee", "dmg": [1, 1]}, "loot": [0, 0]
+		},
+		"lupo": {
+			"label": "Lupo", "hp": 22,
+			"stats": {"forza": 4, "mira": 0, "agilita": 4, "resistenza": 2},
+			"attack": {"label": "azzanna", "kind": "melee", "dmg": [4, 8]},
+			"loot": [0, 0]
+		}
+	},
+	"encounters": {
+		"min_distance": 650,
+		"check_interval": 3.0,
+		"chance": 0.1,
+		"cooldown": 120,
+		"table": [
+			{"title": "Imboscata di banditi!", "enemies": ["bandito", "bandito"], "weight": 3, "ambush": true},
+			{"title": "La banda del Capobanda!", "enemies": ["bandito_capo", "bandito"], "weight": 1, "ambush": true},
+			{"title": "Branco di coyote!", "enemies": ["coyote", "coyote"], "weight": 3, "ambush": false},
+			{"title": "Un lupo affamato!", "enemies": ["lupo"], "weight": 1, "ambush": false}
+		]
+	}
+}

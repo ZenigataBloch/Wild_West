@@ -1,0 +1,157 @@
+{
+  "layout": [
+    "saloon",
+    "bank",
+    "sheriff",
+    "house"
+  ],
+  "types": {
+    "saloon": {
+      "name": "Saloon del Coyote",
+      "sign": "SALOON",
+      "function": "Whiskey, stufato caldo e una stanza per chi ha bisogno di rifiatare. Qui la gente beve, parla e fa affari.",
+      "color": "#7a3b1d",
+      "roof": "#4a2f1a",
+      "open_hours": [
+        10,
+        4
+      ],
+      "actions": [
+        {
+          "id": "whiskey",
+          "type": "buy_heal",
+          "label": "Bicchiere di whiskey",
+          "cost": 3,
+          "heal": 5,
+          "text": "Il whiskey brucia, ma ti rimette in sesto.",
+          "good": "cibo"
+        },
+        {
+          "id": "stew",
+          "type": "buy_heal",
+          "label": "Piatto di stufato",
+          "cost": 6,
+          "heal": 15,
+          "text": "Uno stufato di fagioli e carne. Ti senti molto meglio.",
+          "good": "cibo"
+        },
+        {
+          "id": "room",
+          "type": "rest",
+          "label": "Stanza per la notte",
+          "cost": 10,
+          "heal": "full",
+          "wake_hour": 6,
+          "text": "Dormi in un letto vero e ti svegli all'alba.",
+          "good": "alloggio"
+        }
+      ]
+    },
+    "bank": {
+      "name": "Banca di Dustwater",
+      "sign": "BANCA",
+      "function": "Il caveau della città. Metti al sicuro i tuoi dollari con un po' di interesse, oppure chiedi un prestito: ma poi bisogna restituirlo.",
+      "color": "#6d6a5a",
+      "roof": "#3a382e",
+      "open_hours": [
+        9,
+        17
+      ],
+      "show_bank": true,
+      "actions": [],
+      "bank_ui": true
+    },
+    "sheriff": {
+      "name": "Ufficio dello Sceriffo",
+      "sign": "SCERIFFO",
+      "function": "Legge e ordine a Dustwater. Sulla bacheca ci sono i manifesti dei ricercati; in fondo alla stanza lo sceriffo vende armi autorizzate.",
+      "color": "#5b4a3a",
+      "roof": "#33271d",
+      "open_hours": [
+        0,
+        24
+      ],
+      "actions": [
+        {
+          "id": "ask_law",
+          "type": "info",
+          "label": "Chiedi della legge in città",
+          "text": "Lo sceriffo ti squadra: \"Qui si rispetta la legge, forestiero. Non cercare guai.\""
+        },
+        {
+          "id": "bende",
+          "type": "buy_item",
+          "label": "Bende pulite",
+          "item": "bende",
+          "qty": 1,
+          "cost": 5,
+          "text": "Il vice ti passa un rotolo di garze pulite.",
+          "good": "medicine"
+        },
+        {
+          "id": "w_colt_navy",
+          "type": "buy_weapon",
+          "weapon": "colt_navy",
+          "good": "armi"
+        },
+        {
+          "id": "w_winchester",
+          "type": "buy_weapon",
+          "weapon": "winchester",
+          "good": "armi"
+        },
+        {
+          "id": "w_doppietta",
+          "type": "buy_weapon",
+          "weapon": "doppietta",
+          "good": "armi"
+        },
+        {
+          "id": "w_coltello",
+          "type": "buy_weapon",
+          "weapon": "coltello",
+          "good": "armi"
+        }
+      ],
+      "wanted": [
+        {
+          "name": "Jed \"Occhio Storto\" Harlan",
+          "reward": 150,
+          "crime": "Rapina alla diligenza"
+        },
+        {
+          "name": "Maria la Volpe",
+          "reward": 90,
+          "crime": "Contrabbando di whiskey"
+        },
+        {
+          "name": "Silas Crow",
+          "reward": 250,
+          "crime": "Omicidio"
+        }
+      ]
+    },
+    "house": {
+      "name": "Casa",
+      "sign": "CASA",
+      "function": "Il tuo rifugio. Un letto, un tetto e un posto tranquillo dove passare la notte.",
+      "color": "#8a6a45",
+      "roof": "#4f3a24",
+      "open_hours": [
+        0,
+        24
+      ],
+      "actions": [
+        {
+          "id": "sleep",
+          "type": "rest",
+          "label": "Dormi fino all'alba",
+          "cost": 0,
+          "heal": "full",
+          "wake_hour": 6,
+          "text": "Dormi profondamente e ti svegli riposato."
+        }
+      ]
+    }
+  }
+}

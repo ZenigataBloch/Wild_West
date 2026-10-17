@@ -43,6 +43,7 @@ Leggere sempre questo documento prima di lavorare al progetto.
 - Creare moduli piccoli e indipendenti.
 - Collegare i sistemi tramite dati JSON quando possibile.
 - Evitare sistemi creati ma non utilizzati.
+- Consegna file (regola fissa, dalla Feature 13): includere solo i file nuovi o modificati, compresi recap.md e, se cambiano, questo documento, in un unico .zip con la stessa alberatura del progetto, così da poterlo estrarre direttamente sulla root.
 
 Ogni feature deve migliorare almeno uno dei seguenti aspetti:
 
@@ -56,6 +57,7 @@ Alla fine di ogni feature:
 
 - indicare file modificati
 - aggiornare recap.md
+- consegnare i file in un unico .zip che rispetti l'alberatura delle cartelle del progetto
 - descrivere brevemente il risultato
 
 Formato finale:

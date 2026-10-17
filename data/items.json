@@ -11,11 +11,12 @@
   "bende": {
     "name": "Bende",
     "type": "medicina",
-    "description": "Garze pulite per fasciare le ferite. Recupera 30 salute.",
+    "description": "Garze pulite per fasciare le ferite. Recupera 30 salute e ferma un'emorragia.",
     "value": 5,
     "stackable": true,
     "max_stack": 10,
-    "heal": 30
+    "heal": 30,
+    "bandage": true
   },
   "whisky": {
     "name": "Whisky",

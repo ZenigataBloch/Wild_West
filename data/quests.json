@@ -1,0 +1,61 @@
+{
+	"max_active": 3,
+	"protect_radius": 160,
+	"spawn_distance": [450, 1100],
+	"job_weights": {
+		"default": {"delivery": 2, "retrieval": 2, "protection": 1, "hunt": 1},
+		"cacciatore": {"hunt": 4, "retrieval": 1},
+		"commerciante": {"delivery": 4, "retrieval": 1},
+		"barista": {"delivery": 3, "retrieval": 2},
+		"banchiere": {"delivery": 3, "protection": 2},
+		"sceriffo": {"protection": 3, "retrieval": 2, "hunt": 1},
+		"mercenario": {"protection": 3, "hunt": 2},
+		"minatore": {"retrieval": 3, "delivery": 1}
+	},
+	"types": {
+		"delivery": {
+			"label": "Consegna",
+			"titles": ["Un pacco per {target}", "Consegna per {target}"],
+			"texts": [
+				"Ho un pacco per {target} ({target_job}). Portaglielo e dagli i miei saluti.",
+				"Devo far arrivare un messaggio sigillato a {target} ({target_job}). Pensaci tu?"
+			],
+			"hint": "Hai il pacco: parla con {target} per consegnarlo.",
+			"reward": {"money": [8, 16], "rel": [3, 6], "rep": [1, 2]}
+		},
+		"retrieval": {
+			"label": "Recupero",
+			"titles": ["Recupera: {item}", "{item} smarrito"],
+			"items": ["una cassetta degli attrezzi", "una borsa di cuoio", "un orologio d'argento", "una sella perduta"],
+			"texts": [
+				"Ho perso {item} fuori città. Cerca i punti gialli lungo i sentieri e riportamela.",
+				"Qualcuno ha abbandonato {item} nel deserto. Se la ritrovi, ti pago."
+			],
+			"hint": "Cerca fuori città: il punto giallo segna dove si trova.",
+			"reward": {"money": [10, 22], "rel": [3, 6], "rep": [1, 2]}
+		},
+		"protection": {
+			"label": "Protezione",
+			"titles": ["Proteggi {target}", "Occhio a {target}"],
+			"seconds": [40, 70],
+			"texts": [
+				"Girano brutti ceffi e {target} ({target_job}) è nei guai. Resta vicino a lui per {seconds} secondi.",
+				"Voglio che {target} ({target_job}) non resti solo. Stagli accanto per {seconds} secondi."
+			],
+			"hint": "Resta vicino a {target} per {seconds} secondi, poi torna da me.",
+			"reward": {"money": [14, 26], "rel": [4, 8], "rep": [2, 3]}
+		},
+		"hunt": {
+			"label": "Caccia",
+			"titles": ["Caccia: {animal}", "Battuta ai {animal}"],
+			"animals": ["coyote", "cervo", "lepre"],
+			"count": [2, 3],
+			"texts": [
+				"Ci sono troppi {animal} intorno alla città. Abbatti {count} capi fuori dall'abitato.",
+				"Ho bisogno di carne fresca: portami {count} {animal}, ma non rovinare le pelli."
+			],
+			"hint": "Cerca i {animal} fuori città e premi E vicino a loro per affrontarli (si combatte a turni).",
+			"reward": {"money": [12, 24], "rel": [3, 6], "rep": [1, 2]}
+		}
+	}
+}

@@ -1,0 +1,64 @@
+{
+	"rep_group": "commercianti",
+	"deposit": {
+		"daily_rate": 0.004,
+		"min_balance": 10,
+		"max_interest_per_day": 25,
+		"quick_amounts": [10, 50, "all"]
+	},
+	"loans": {
+		"max_active": 2,
+		"limits": {"Odiato": 0, "Malvisto": 40, "Sconosciuto": 100, "Rispettato": 300, "Leggenda": 600},
+		"collateral_factor": 1.0,
+		"amounts": [25, 50, 100, 200, 400, 600],
+		"terms": [
+			{"days": 5, "rate_mult": 0.8, "label": "Breve, 5 giorni"},
+			{"days": 10, "rate_mult": 1.0, "label": "Normale, 10 giorni"},
+			{"days": 20, "rate_mult": 1.3, "label": "Lungo, 20 giorni"}
+		],
+		"base_daily_rate": 0.02,
+		"min_rate": 0.005,
+		"max_rate": 0.08,
+		"market_sensitivity": 0.5,
+		"origination_fee": 0.03,
+		"repay_quick_amounts": [25, 100]
+	},
+	"penalties": {
+		"late_fee": 0.05,
+		"overdue_rate_mult": 2.0,
+		"default_days": 5,
+		"blacklist_days": 10,
+		"banker_relationship": -15
+	},
+	"reputation": {
+		"on_time": 3,
+		"late_repaid": 1,
+		"overdue_start": -4,
+		"overdue_day": -1,
+		"default_commercianti": -20,
+		"default_cittadini": -6
+	},
+	"text": {
+		"nothing_to_deposit": "Non hai nulla da depositare.",
+		"no_cash": "Non hai abbastanza contanti.",
+		"deposited": "Depositi ${amount}. Saldo: ${balance}.",
+		"no_balance": "Saldo insufficiente.",
+		"withdrawn": "Ritiri ${amount}. Saldo: ${balance}.",
+		"blacklisted": "La banca non ti concede credito: sei in lista nera ancora per {days} giorni.",
+		"has_overdue": "Hai un debito scaduto: salda prima quello.",
+		"too_many": "Hai già troppi prestiti aperti.",
+		"no_credit": "La banca non ti fa credito per ora (fascia: {tier}, debiti già aperti). Migliora la reputazione presso i commercianti o aumenta il deposito in cassa.",
+		"too_high": "Quella cifra supera il tuo fido.",
+		"loan_taken": "Prestito di ${amount} concesso. Da restituire entro il giorno {due}: circa ${owed}.",
+		"repay_nothing": "Non hai contanti da versare.",
+		"repaid_part": "Versi ${paid}. Ti restano ${left} da pagare.",
+		"repaid_full": "Prestito estinto con ${paid}. La banca ti ringrazia.",
+		"repaid_full_late": "Debito saldato con ${paid}, anche se in ritardo.",
+		"warn_tomorrow": "La banca: il prestito #{id} scade domani (devi ${owed}).",
+		"overdue": "Prestito #{id} scaduto! Penale di ${fee}, ora devi ${owed}. I tuoi debiti pesano sulla reputazione.",
+		"default": "La banca ha dichiarato l'insolvenza del prestito #{id}.",
+		"seized": "Sequestrati ${seized} dal tuo conto.",
+		"default_left": "Restano ${left} da pagare e non avrai credito per {days} giorni.",
+		"interest_note": "Interessi del giorno: +${amount} sul conto."
+	}
+}

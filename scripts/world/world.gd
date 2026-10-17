@@ -5,7 +5,10 @@ extends Node2D
 ##        X combattimento di prova (fuori città scattano imboscate casuali),
 ##        H -10 salute, J +10 salute, K +10 soldi, B aggiunge bende, G regala un'arma casuale,
 ##        V ti infligge una ferita casuale, T una sfida a duello,
-##        L pannello dei lavori, M pannello del mercato.
+##        L pannello dei lavori, M pannello del mercato, N pannello delle bande (Feature 19),
+##        C pannello del malaffare: furti, rapine, ricatti, contrabbando (Feature 20).
+## Con notorietà alta i vice dello sceriffo ti inseguono e ti arrestano (Feature 21).
+## Eventi casuali (rapina in banca, incendio, aggressione, carovana, duello, incontro misterioso): Y ne fa partire uno (Feature 22).
 ## I lotti senza edificio sono in vendita: E sul cartello per comprare terreno, casa o negozio (Feature 18).
 
 const CONFIG_PATH := "res://data/world_config.json"
@@ -34,6 +37,10 @@ var _jobs: JobManager
 var _economy: EconomyManager
 var _bank: BankManager
 var _property: PropertyManager
+var _gangs: GangManager
+var _crime: CrimeManager
+var _law: LawManager
+var _events: EventManager
 
 func _ready() -> void:
 	var f := FileAccess.open(CONFIG_PATH, FileAccess.READ)
@@ -153,6 +160,27 @@ func _build_town_nodes() -> void:
 	avoid.append(Rect2(st[0], st[1], st[2], st[3]))
 	_jobs.set_world(_buildings.buildings, bounds, avoid)
 
+	_gangs = GangManager.new()
+	_town_root.add_child(_gangs)
+	_gangs.message.connect(_prompt_hud.show_message)
+	_gangs.setup(avatar, Vector2(town["origin"][0], town["origin"][1]), _combat)
+	_gangs.set_world(bounds, avoid)
+
+	_crime = CrimeManager.new()
+	_town_root.add_child(_crime)
+	_crime.message.connect(_prompt_hud.show_message)
+	_crime.setup(avatar, Vector2(town["origin"][0], town["origin"][1]), _combat)
+
+	_law = LawManager.new()
+	_town_root.add_child(_law)
+	_law.message.connect(_prompt_hud.show_message)
+	_law.setup(avatar, Vector2(town["origin"][0], town["origin"][1]), _combat, _buildings)
+
+	_events = EventManager.new()
+	_town_root.add_child(_events)
+	_events.message.connect(_prompt_hud.show_message)
+	_events.setup(avatar, Vector2(town["origin"][0], town["origin"][1]), _combat, _duels)
+
 	var used: Array[Rect2] = []
 	for b in _buildings.buildings:
 		used.append(b["rect"])
@@ -176,7 +204,7 @@ func _build_town_nodes() -> void:
 
 func _process(_d: float) -> void:
 	_modulate.color = GameTime.get_light_color()
-	_info.text = "%s  |  Giorno %d  %s  (%s)  |  seed %d  |  x%.0f  |  WASD muovi, Shift corri, E interagisci, L lavoro, M mercato" % [
+	_info.text = "%s  |  Giorno %d  %s  (%s)  |  seed %d  |  x%.0f  |  WASD muovi, Shift corri, E interagisci, L lavoro, M mercato, N bande, C malaffare" % [
 		town.get("name", "?"), GameTime.day, GameTime.get_time_string(),
 		GameTime.phase, WorldSeed.world_seed, GameTime.time_scale]
 

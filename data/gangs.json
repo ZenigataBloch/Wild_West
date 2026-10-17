@@ -1,0 +1,198 @@
+{
+  "count": 3,
+  "names": ["Lupi di Ferro", "Corvi Neri", "Serpente a Sonagli", "Cavalieri della Cenere", "Spettri del Canyon", "Fratelli Sullivan", "Vipere Rosse", "Diavoli di Polvere"],
+  "bosses": ["Silas Crane", "Dolores la Vedova", "Elias Voss", "Tobias Mercer", "Amos Redding", "Cassidy Blackwood", "Mateo Navarro", "Ezekiel Stone"],
+  "first_names": ["Jed", "Cal", "Pete", "Rufus", "Wade", "Clay", "Hank", "Abe", "Luke", "Ike", "Nate", "Ramon", "Diego", "Wyatt", "Boone", "Tex"],
+  "nicknames": ["Dente", "Coltello", "Cenere", "Vipera", "Gufo", "Mancino", "Zoppo", "Rosso", "Occhio Storto", "Scimmia", "Corvo", "Ghigno"],
+  "colors": ["#8b2e2e", "#2e5a8b", "#4f7a3a", "#8b6b1f", "#6b3a7a", "#555555"],
+
+  "placement": {
+    "margin": 300,
+    "min_town_distance": 1100,
+    "min_gang_distance": 1500,
+    "avoid_margin": 200,
+    "attempts": 200,
+    "ring_distance": 1600
+  },
+
+  "territory": {
+    "base_radius": 340,
+    "per_member": 14,
+    "min_radius": 160,
+    "max_radius": 650,
+    "core_radius": 150
+  },
+
+  "members": {
+    "min": 7,
+    "max": 13,
+    "max_total": 22,
+    "dissolve_below": 1,
+    "wealth_per_strength": 80
+  },
+
+  "economy": {
+    "start_wealth_min": 60,
+    "start_wealth_max": 220,
+    "income_per_member": 3.0,
+    "upkeep_per_member": 2.6,
+    "max_wealth": 600,
+    "desert_chance": 0.12,
+    "recruit_cost": 15
+  },
+
+  "respawn_days": [8, 14],
+
+  "reputation": {
+    "start_range": 8,
+    "group_factor": 0.4,
+    "enemy_factor": -0.5,
+    "global_bias": 0.4,
+    "hostile_max": -20,
+    "friendly_min": 20
+  },
+
+  "patrol": {
+    "town_safe_radius": 900,
+    "check_seconds": 6,
+    "cooldown_seconds": 90,
+    "max_per_day": 2,
+    "chance": { "hostile": 0.35, "wary": 0.15, "friendly": 0.0 }
+  },
+
+  "encounter": {
+    "toll_base": 12,
+    "toll_per_member": 1.5,
+    "payoff_mult": 2.5,
+    "donate_amount": 30,
+    "rest_heal": 25,
+    "help_min_health": 40,
+    "boss_chance": 0.25,
+    "boss_min_members": 6,
+    "fight_group": { "min": 2, "max": 4, "per_members": 5 }
+  },
+
+  "checks": {
+    "min": 0.1,
+    "max": 0.9,
+    "talk_base": 0.35,
+    "talk_per_stat": 0.05,
+    "talk_rep_div": 200,
+    "leave_base": 0.45,
+    "leave_per_stat": 0.05,
+    "flee_base": 0.2,
+    "flee_per_stat": 0.05
+  },
+
+  "deltas": {
+    "toll": 2,
+    "talk_ok": 6,
+    "talk_fail": -4,
+    "pay_off": 8,
+    "donate": 5,
+    "rumors": 1,
+    "rest": 1,
+    "flee": -1,
+    "help_goal": 10,
+    "clash_won": -12,
+    "boss_killed": -10,
+    "clash_lost": -2,
+    "clash_other": -3,
+    "law_on_clash": 2,
+    "citizens_on_clash": 1,
+    "law_on_boss": 4
+  },
+
+  "goal_effects": {
+    "expand_gain": [50, 100],
+    "expand_enemy_loss": 40,
+    "recruit_count": [2, 4],
+    "vendetta_losses": [1, 3],
+    "vendetta_radius_loss": 30,
+    "vendetta_loot_share": 0.2,
+    "loot_wealth": [60, 200],
+    "loot_loss_chance": 0.2,
+    "ally_progress": 0.4
+  },
+
+  "goals": {
+    "expand":   { "label": "Allargare il territorio", "weight": 3, "days": [4, 8] },
+    "recruit":  { "label": "Reclutare nuovi uomini", "weight": 3, "days": [3, 6] },
+    "vendetta": { "label": "Vendetta contro «{enemy}»", "weight": 3, "days": [5, 9] },
+    "loot":     { "label": "Assaltare una carovana", "weight": 2, "days": [3, 6] }
+  },
+
+  "stances": {
+    "friendly": {
+      "label": "Amico",
+      "intro": "Gli uomini della banda «{gang}» ti riconoscono e abbassano le armi. «{boss} dice che sei dei nostri, straniero. Ti serve qualcosa?»",
+      "options": ["rest", "rumors", "donate", "help_goal", "bye"]
+    },
+    "wary": {
+      "label": "Diffidente",
+      "intro": "Una pattuglia della banda «{gang}» ti sbarra la strada. «Questa è terra nostra, straniero. Qui si paga, oppure si parla con {boss}.»",
+      "options": ["toll", "talk", "leave", "fight"]
+    },
+    "hostile": {
+      "label": "Nemico",
+      "intro": "Gli uomini della banda «{gang}» ti hanno riconosciuto e ti circondano. «{boss} ti vuole morto, straniero!»",
+      "options": ["pay_off", "flee", "fight"]
+    }
+  },
+
+  "options": {
+    "toll":      { "label": "Paga il pedaggio (${cost})", "tip": "Compri un giorno di passaggio sicuro." },
+    "talk":      { "label": "Prova a parlare con il capo", "tip": "Prova di Carisma: se va bene guadagni stima e qualche voce." },
+    "leave":     { "label": "Fai dietrofront", "tip": "Prova di Agilità: se fallisci aprono il fuoco." },
+    "fight":     { "label": "Combatti", "tip": "Scontro a turni contro la pattuglia." },
+    "pay_off":   { "label": "Compra la loro pazienza (${cost})", "tip": "Ti lasciano andare e la loro ostilità cala." },
+    "flee":      { "label": "Scappa", "tip": "Prova di Agilità difficile: se fallisci ti sparano alle spalle." },
+    "rest":      { "label": "Riposa al campo", "tip": "Recuperi salute (una volta al giorno)." },
+    "rumors":    { "label": "Chiedi in giro", "tip": "Scopri i loro piani, i loro nemici e dove si nascondono i rivali." },
+    "donate":    { "label": "Offri una mancia (${cost})", "tip": "Aumenta la loro stima e la loro cassa." },
+    "help_goal": { "label": "Offri la tua pistola", "tip": "Aiuta la banda contro «{enemy}»: scontro vero." },
+    "bye":       { "label": "Saluta e vai", "tip": "" }
+  },
+
+  "texts": {
+    "enter": "Entri nel territorio della banda «{gang}». ({stance})",
+    "leave_territory": "Ti lasci alle spalle il territorio della banda «{gang}».",
+    "combat_title": "Scontro con la banda «{gang}»",
+    "no_combat": "Non c'è nessuno scontro da affrontare.",
+    "no_money": "Non hai abbastanza soldi.",
+
+    "toll_paid": "Getti i soldi ai piedi del capopattuglia. «Per oggi puoi passare.»",
+    "talk_ok": "{boss} ti ascolta e ti riconosce una certa faccia tosta. «Hai coraggio. Per oggi sei un ospite.»",
+    "talk_fail": "{boss} ti liquida con un gesto. «Non mi piacciono i chiacchieroni. Sparisci.»",
+    "leave_ok": "Alzi le mani, indietreggi con calma e ti lasciano andare.",
+    "leave_fail": "Appena volti le spalle, qualcuno arma il cane della pistola. «Non così in fretta!»",
+    "pay_off_ok": "Il capopattuglia conta i soldi e sogghigna. «Per oggi ti risparmiamo. Domani, chissà.»",
+    "flee_ok": "Spingi via un uomo e ti butti nella polvere: riesci a sparire tra le rocce.",
+    "flee_fail": "Corri, ma un colpo ti taglia la strada. Gli uomini della banda ti sono addosso!",
+    "rest": "Ti lasciano un posto vicino al fuoco. Dormi un paio d'ore e ti senti meglio.",
+    "rumors_goal": "Obiettivo della banda: {goal}.",
+    "rumors_enemies": "Nemici della banda: {enemies}.",
+    "rumors_gang": "Ti dicono che la banda «{gang}» si nasconde a {dir} della città.",
+    "rumors_none": "Non hanno nient'altro da raccontarti.",
+    "donate": "{boss} intasca la mancia con un cenno del capo. «Gli amici si ricordano.»",
+    "help_start": "«Se vuoi renderti utile, c'è una pattuglia di «{enemy}» qua vicino.» Ti accodi ai suoi uomini.",
+    "fight_start": "Porti la mano alla pistola. Non c'è più niente da dire.",
+    "bye": "Saluti e riprendi la strada.",
+
+    "clash_won": "Hai sconfitto gli uomini della banda «{gang}». {killed} fuori gioco: ora ti odiano.",
+    "clash_boss": "Hai abbattuto il capo, {boss}! La banda è nel caos, e ti cercherà.",
+    "clash_lost": "Gli uomini della banda «{gang}» ti hanno battuto e ora ridono di te.",
+    "clash_other": "Lo scontro con la banda «{gang}» ha lasciato strascichi.",
+
+    "news_expand": "La banda «{gang}» allarga i suoi confini: il suo territorio è più grande.",
+    "news_expand_war": "La banda «{gang}» si allarga ai danni di «{enemy}», che perde terreno.",
+    "news_recruit": "La banda «{gang}» recluta {n} nuovi uomini.",
+    "news_vendetta": "La banda «{winner}» regola i conti con «{loser}»: {n} uomini caduti.",
+    "news_loot": "La banda «{gang}» assalta una carovana e torna con il bottino.",
+    "news_loot_loss": "La banda «{gang}» assalta una carovana, ma perde un uomo nello scontro.",
+    "news_desert": "Senza paga, un uomo abbandona la banda «{gang}».",
+    "news_dissolve": "La banda «{gang}» si sbanda: i superstiti si disperdono nel deserto.",
+    "news_new_gang": "Una nuova banda, «{gang}», si è stabilita nel deserto.",
+    "rumor": "Voci dal bancone: la banda «{gang}» sembra annidata a {dir} della città."
+  }
+}

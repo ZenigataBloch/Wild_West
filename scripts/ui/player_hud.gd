@@ -25,6 +25,7 @@ var _inv_list: ItemList
 func _ready() -> void:
 	layer = 10
 	_build_hud()
+	_build_version_label()
 	_build_sheet()
 	PlayerState.name_changed.connect(_refresh_hud.unbind(1))
 	PlayerState.health_changed.connect(_refresh_hud.unbind(2))
@@ -50,6 +51,22 @@ func _ready() -> void:
 	add_child(debt_timer)
 	_refresh_debt()
 	_refresh_property()
+
+const GAME_VERSION := "Feature 22"
+
+func _build_version_label() -> void:
+	var v := Label.new()
+	v.text = "Wild West — %s" % GAME_VERSION
+	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	v.add_theme_color_override("font_color", Color(1, 1, 1, 0.75))
+	v.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.8))
+	v.add_theme_constant_override("shadow_offset_x", 1)
+	v.add_theme_constant_override("shadow_offset_y", 1)
+	v.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	v.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	v.offset_right = -16
+	v.offset_top = 10
+	add_child(v)
 
 func _build_hud() -> void:
 	var panel := PanelContainer.new()

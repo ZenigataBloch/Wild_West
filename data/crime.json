@@ -1,0 +1,466 @@
+{
+  "interact_radius": 130,
+  "building_radius": 200,
+  "witness_radius": 320,
+  "sheriff_radius": 420,
+  "night_from": 21,
+  "night_to": 5,
+  "unseen_rep_mult": 0.25,
+  "chance_min": 0.05,
+  "chance_max": 0.92,
+  "ranged_types": [
+    "pistola",
+    "fucile",
+    "doppietta"
+  ],
+  "protected_jobs": [
+    "sceriffo"
+  ],
+  "npc_jobs": [
+    "sceriffo",
+    "banchiere",
+    "barista",
+    "minatore",
+    "cacciatore",
+    "commerciante",
+    "mercenario"
+  ],
+  "trade_jobs": [
+    "banchiere",
+    "commerciante",
+    "barista"
+  ],
+  "heat": {
+    "max": 100,
+    "decay_per_day": 5,
+    "bounty_per_heat": 5,
+    "bounty_min_heat": 10,
+    "stars": [
+      10,
+      25,
+      45,
+      65,
+      85
+    ],
+    "star_names": [
+      "Sospetto",
+      "Ricercato",
+      "Fuorilegge",
+      "Bandito famoso",
+      "Nemico pubblico"
+    ],
+    "witness_mult": 0.25,
+    "sheriff_mult": 1.0
+  },
+  "wealth": {
+    "banchiere": [
+      15,
+      45
+    ],
+    "commerciante": [
+      8,
+      26
+    ],
+    "barista": [
+      4,
+      14
+    ],
+    "mercenario": [
+      5,
+      16
+    ],
+    "minatore": [
+      3,
+      11
+    ],
+    "cacciatore": [
+      3,
+      11
+    ],
+    "default": [
+      3,
+      10
+    ]
+  },
+  "pickpocket": {
+    "base": 0.45,
+    "per_stat": 0.04,
+    "witness_penalty": 0.04,
+    "night_bonus": 0.1,
+    "victim_cooldown_days": 2,
+    "heat_ok": 3,
+    "heat_fail": 9,
+    "rep_ok": {
+      "cittadini": -1
+    },
+    "rep_fail": {
+      "cittadini": -3,
+      "legge": -1
+    },
+    "relation_fail": -20,
+    "punch_chance": 0.3,
+    "punch_damage": [
+      2,
+      6
+    ],
+    "text_ok": [
+      "Le tue dita scivolano nella tasca di {name} senza che se ne accorga. Intaschi ${loot}.",
+      "Un urto \"casuale\", una scusa borbottata e il borsellino di {name} cambia padrone: ${loot}.",
+      "{name} guarda altrove un istante di troppo. Ti ritrovi ${loot} in più."
+    ],
+    "text_fail": [
+      "{name} ti afferra il polso: \"Ladro!\" Il grido richiama l'attenzione di mezza strada.",
+      "La tua mano è nella tasca sbagliata al momento sbagliato. {name} ti fissa con rabbia.",
+      "{name} si volta di scatto e ti coglie sul fatto."
+    ],
+    "text_punch": "{name} ti molla un pugno prima che tu possa scappare (-{dmg} salute)."
+  },
+  "robbery": {
+    "cooldown_days": 3,
+    "guard_enemy": "bandito",
+    "heat_fail_mult": 1.3,
+    "day": {
+      "base": 0.5,
+      "mira": 0.03,
+      "carisma": 0.015,
+      "witness_penalty": 0.03
+    },
+    "night": {
+      "base": 0.35,
+      "agilita": 0.035,
+      "witness_penalty": 0.0
+    },
+    "targets": [
+      {
+        "id": "bank",
+        "match": [
+          "banc",
+          "bank"
+        ],
+        "label": "Banca",
+        "day": {
+          "loot": [
+            140,
+            320
+          ],
+          "difficulty": 0.25,
+          "guards": 2,
+          "heat": 28,
+          "rep": {
+            "commercianti": -6,
+            "legge": -8,
+            "cittadini": -3
+          }
+        },
+        "night": {
+          "loot": [
+            80,
+            190
+          ],
+          "difficulty": 0.3,
+          "guards": 1,
+          "heat": 20,
+          "rep": {
+            "commercianti": -4,
+            "legge": -6,
+            "cittadini": -1
+          }
+        }
+      },
+      {
+        "id": "saloon",
+        "match": [
+          "saloon"
+        ],
+        "label": "Saloon",
+        "day": {
+          "loot": [
+            30,
+            90
+          ],
+          "difficulty": 0.1,
+          "guards": 1,
+          "heat": 14,
+          "rep": {
+            "commercianti": -3,
+            "legge": -4,
+            "cittadini": -2
+          }
+        },
+        "night": {
+          "loot": [
+            18,
+            55
+          ],
+          "difficulty": 0.15,
+          "guards": 1,
+          "heat": 9,
+          "rep": {
+            "commercianti": -2,
+            "legge": -3,
+            "cittadini": -1
+          }
+        }
+      }
+    ],
+    "text_ok_day": [
+      "Metti mano alla pistola e chiedi la cassa. Nessuno ha il coraggio di fiatare: ${loot} nel sacco, e sei fuori.",
+      "\"Tutto quello che avete in cassa. Subito.\" Il cassiere obbedisce con le mani tremanti: ${loot}."
+    ],
+    "text_ok_night": [
+      "Con un piede di porco forzi il retro. Il buio ti protegge: ${loot} dalla cassa e via, prima dell'alba.",
+      "La serratura cede con uno scatto sommesso. Ripulisci la cassa e scompari con ${loot}."
+    ],
+    "text_fail_day": [
+      "Qualcuno schiaccia l'allarme. Le guardie spalancano la porta: è una sparatoria!",
+      "Il cassiere non si lascia intimidire e afferra il fucile sotto il banco. Si spara!"
+    ],
+    "text_fail_night": [
+      "Una tavola scricchiola. Il guardiano notturno ti piomba addosso con la pistola in pugno!",
+      "Il rumore ha svegliato la guardia. Ti trovi puntata un'arma in faccia."
+    ]
+  },
+  "blackmail": {
+    "base": 0.5,
+    "per_stat": 0.05,
+    "secret_chance": 0.55,
+    "secret_bonus": 0.2,
+    "bluff_penalty": 0.3,
+    "bluff_pay_mult": 0.6,
+    "witness_penalty": 0.05,
+    "cooldown_days": 3,
+    "pay_mult": [
+      1.5,
+      3.0
+    ],
+    "heat_ok": 4,
+    "heat_fail": 10,
+    "rep_ok": {
+      "cittadini": -2
+    },
+    "rep_fail": {
+      "cittadini": -4,
+      "legge": -3
+    },
+    "rep_trade_fail": {
+      "commercianti": -3
+    },
+    "relation_ok": -25,
+    "relation_fail": -30,
+    "secrets": [
+      "ha truccato i conti della bottega per anni",
+      "ha un debito di gioco con una banda del deserto",
+      "è stato visto uscire di nascosto dalla casa di un altro",
+      "ha seppellito qualcuno fuori città, molto tempo fa",
+      "vende whiskey allungato spacciandolo per buono",
+      "ha un nome falso: da dove viene ha lasciato guai seri",
+      "riceve pagamenti segreti da una banda",
+      "ha falsificato un atto di proprietà"
+    ],
+    "text_ok_secret": [
+      "\"So che {name} {secret}.\" Il suo volto si fa grigio. Sborsa ${loot} per il tuo silenzio.",
+      "Ti basta sussurrare quello che sai: {name} {secret}. Ti allunga ${loot} con le mani che tremano."
+    ],
+    "text_ok_bluff": [
+      "Il tuo è solo un bluff, ma {name} ha la coscienza sporca e abbocca: ${loot} per farti tacere."
+    ],
+    "text_fail_secret": [
+      "{name} ti ride in faccia: \"Dillo pure a chi vuoi. Vedremo chi ci crede.\" Ti mette in guardia e va dritto a parlare con la legge."
+    ],
+    "text_fail_bluff": [
+      "{name} non ha niente da nascondere e non capisce di cosa parli. La tua minaccia a vuoto fa il giro della città."
+    ]
+  },
+  "smuggling": {
+    "min_distance": 650,
+    "hours": 3,
+    "min_gang_rep": -19,
+    "friend_rep": 20,
+    "friend_bonus": 0.15,
+    "loads": [
+      {
+        "id": "whiskey",
+        "label": "Whiskey di contrabbando",
+        "cost": 25,
+        "good": "cibo",
+        "margin": [
+          1.35,
+          1.8
+        ]
+      },
+      {
+        "id": "tabacco",
+        "label": "Tabacco non tassato",
+        "cost": 60,
+        "good": "merci",
+        "margin": [
+          1.3,
+          1.75
+        ]
+      },
+      {
+        "id": "fucili",
+        "label": "Casse di fucili rubati",
+        "cost": 120,
+        "good": "armi",
+        "margin": [
+          1.25,
+          1.9
+        ]
+      }
+    ],
+    "patrol_chance": 0.35,
+    "patrol_night_mult": 0.7,
+    "patrol_heat_mult": 0.004,
+    "escape": {
+      "base": 0.45,
+      "agilita": 0.04,
+      "carisma": 0.02,
+      "heat_pen": 0.003
+    },
+    "heat_ok": 4,
+    "heat_fail": 14,
+    "combat_chance": 0.4,
+    "combat_enemy": "bandito",
+    "combat_count": [
+      1,
+      2
+    ],
+    "combat_title": "Pattuglia sulle tracce del carico",
+    "rep_ok": {
+      "gang": 2,
+      "legge": -1
+    },
+    "rep_fail": {
+      "legge": -3,
+      "gang": -1
+    },
+    "text_ok": [
+      "Il contatto ti aspetta al crepuscolo. Il carico passa di mano senza una parola di troppo: ricavi ${gross} (netto ${net}).",
+      "Consegni la merce a due uomini incappucciati e ricevi ${gross} (netto ${net})."
+    ],
+    "text_patrol_escaped": "Una pattuglia vi viene incontro, ma riesci a seminarla tra le rocce.",
+    "text_patrol_caught": "Una pattuglia ti ferma e confisca il carico. Perdi l'investimento di ${cost}.",
+    "text_combat": "Non ti arrendi: i cacciatori di taglie aprono il fuoco!"
+  },
+  "ui": {
+    "title": "MALAFFARE",
+    "clean": "Fedina pulita: nessuno ti cerca.",
+    "nobody": "Nessuno a portata di mano.",
+    "no_building": "Nessun edificio da colpire qui vicino.",
+    "need_firearm": "Serve un'arma da fuoco in mano per una rapina a mano armata.",
+    "robbed_recently": "L'hai colpito da poco: ora è sorvegliato.",
+    "victim_recently": "Hai già tentato con lui da poco.",
+    "mode_day": "a mano armata",
+    "mode_night": "scasso notturno",
+    "footer_menu": "[1-9] scegli   -   [C] o [Esc] chiudi",
+    "footer_result": "[Invio] continua",
+    "continue": "Continua",
+    "history_title": "Ultimi colpi",
+    "history_empty": "Nessun colpo finora.",
+    "wanted_up": "Sei ricercato: {name} - taglia ${bounty}.",
+    "groups": {
+      "pickpocket": {
+        "title": "FURTO",
+        "desc": "Borseggia chi ti sta vicino. Contano Agilità, testimoni e notte."
+      },
+      "robbery": {
+        "title": "RAPINA",
+        "desc": "Di giorno a mano armata (Mira e Carisma, guardie); di notte scasso (Agilità)."
+      },
+      "blackmail": {
+        "title": "RICATTO",
+        "desc": "Fai pagare chi ha qualcosa da nascondere (Carisma). Non sai chi ne ha uno."
+      },
+      "smuggling": {
+        "title": "CONTRABBANDO",
+        "desc": "Fuori città, con un contatto delle bande: compri un carico e lo rivendi (mercato, pattuglie)."
+      },
+      "law": {
+        "title": "LEGGE",
+        "desc": "Taglie e arresti. Paga la taglia davanti all'Ufficio dello Sceriffo per ripulirti."
+      },
+      "event": {
+        "title": "CHE FAI?",
+        "desc": ""
+      }
+    }
+  },
+  "law": {
+    "min_level": 2,
+    "jurisdiction": 1400,
+    "check_interval": 4,
+    "pursuit_cooldown": 60,
+    "chase_chance": [
+      0,
+      0.25,
+      0.4,
+      0.6,
+      0.85
+    ],
+    "chase_speed": 200,
+    "speed_per_level": 12,
+    "catch_radius": 36,
+    "lose_distance": 1100,
+    "lose_seconds": 12,
+    "spawn_min_distance": 350,
+    "sheriff_match": [
+      "sceriff",
+      "sheriff"
+    ],
+    "fine_mult": 0.5,
+    "fine_base": 10,
+    "jail_wake_hour": 8,
+    "arrest_heat_mult": 0.25,
+    "arrest_rep": {
+      "legge": 2
+    },
+    "pay": {
+      "rep": {
+        "legge": 4,
+        "cittadini": 1
+      }
+    },
+    "bribe": {
+      "cost_mult": 0.6,
+      "cost_min": 20,
+      "base": 0.35,
+      "carisma": 0.05,
+      "heat_mult": 0.4,
+      "rep_ok": {
+        "legge": -2
+      },
+      "fail_extra_days": 1
+    },
+    "flee": {
+      "base": 0.35,
+      "agilita": 0.05,
+      "level_pen": 0.05,
+      "heat_ok": 3,
+      "fail_extra_days": 1
+    },
+    "resist": {
+      "heat": 15,
+      "rep": {
+        "legge": -8,
+        "cittadini": -2
+      },
+      "enemy": "bandito",
+      "title": "Resistenza all'arresto"
+    },
+    "texts": {
+      "warn": "Lo sceriffo ha mandato i suoi uomini a cercarti!",
+      "lost": "Hai seminato gli uomini dello sceriffo. La taglia, però, resta.",
+      "open": "I vice dello sceriffo ti hanno raggiunto. \"In nome della legge, sei in arresto!\"",
+      "pay_ok": "Paghi ${cost} sul tavolo dello sceriffo. La taglia è cancellata: per la legge sei di nuovo un uomo libero.",
+      "pay_no": "Non hai abbastanza soldi per pagare la taglia.",
+      "pay_none": "Non c'è nessuna taglia sul tuo conto.",
+      "arrest": "Ti sbattono in cella. Passi {days} giorno/i dietro le sbarre e paghi una multa di ${fine}. All'alba ti rimettono in libertà.",
+      "bribe_ok": "Una mazzetta ben piazzata: lo sceriffo \"dimentica\" parte dei tuoi guai. La taglia scende.",
+      "bribe_fail": "Il vice rifiuta sdegnato, tiene i tuoi ${cost} come prova e ti trascina in cella.",
+      "flee_ok": "Dai uno spintone, scatti tra i cavalli e sparisci nel polverone. Per ora li hai seminati.",
+      "flee_fail": "Inciampi: ti riprendono subito e ti trascinano in cella.",
+      "resist": "Estrai l'arma e ti apri la strada a colpi di pistola: la legge risponde al fuoco!"
+    }
+  }
+}

@@ -1,2 +1,10 @@
-res://scripts/buildings/building_manager.gd
-res://scripts/ui/building_panel.gd
+res://scripts/crime/crime_db.gd
+res://scripts/crime/crime_manager.gd
+res://scripts/crime/crime_system.gd
+res://scripts/law/law_manager.gd
+res://scripts/law/law_system.gd
+res://scripts/law/posse_view.gd
+res://scripts/ui/crime_panel.gd
+res://scripts/ui/player_hud.gd
+res://scripts/world/world.gd
+res://scripts/events/event_manager.gd

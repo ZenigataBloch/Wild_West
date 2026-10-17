@@ -1,0 +1,114 @@
+{
+  "check_interval": 5,
+  "chance_per_check": 0.12,
+  "cooldown_seconds": 150,
+  "max_per_day": 2,
+  "town_radius": 700,
+  "ui_group_title": "EVENTO",
+  "events": [
+    {
+      "id": "bank_robbery",
+      "title": "Rapina in banca!",
+      "weight": 3,
+      "town_only": true,
+      "hours": [8, 18],
+      "text": "Colpi di pistola dalla banca! Due uomini mascherati escono con un sacco in spalla e puntano verso i cavalli. La gente si getta a terra.",
+      "options": [
+        {"label": "Intervieni a pistola spianata", "tip": "Scontro con i banditi. Serve un'arma da fuoco.", "firearm": true,
+         "result": {"text": "Ti pari davanti ai banditi: la sparatoria è inevitabile.", "combat": {"enemy": "bandito", "count": [2, 2], "title": "Rapina in banca"}, "rep": {"cittadini": 4, "commercianti": 4, "legge": 4}}},
+        {"label": "Dai l'allarme allo sceriffo", "tip": "Prova di Carisma per farti ascoltare.",
+         "check": {"stat": "carisma", "base": 0.5, "per_stat": 0.05},
+         "ok": {"text": "Lo sceriffo ti ascolta e parte all'inseguimento. Il banchiere ti ringrazia con una ricompensa.", "money": [20, 45], "rep": {"legge": 4, "commercianti": 3}},
+         "fail": {"text": "Nessuno ti dà retta nella confusione. I banditi spariscono nel deserto.", "rep": {"commercianti": -1}}},
+        {"label": "Tieni la testa bassa", "tip": "Non sono affari tuoi.",
+         "result": {"text": "Aspetti che la polvere si posi. La banca è stata ripulita.", "rep": {"cittadini": -2, "commercianti": -2}}}
+      ]
+    },
+    {
+      "id": "fire",
+      "title": "Incendio in città!",
+      "weight": 3,
+      "town_only": true,
+      "text": "Una lanterna rovesciata ha dato fuoco a un fienile. Le fiamme corrono verso le case vicine e i cittadini formano una catena di secchi.",
+      "options": [
+        {"label": "Aiuta con i secchi", "tip": "Prova di Resistenza. Se sbagli ti scotti.",
+         "check": {"stat": "resistenza", "base": 0.45, "per_stat": 0.06},
+         "ok": {"text": "Passi secchi finché le braccia non ti tremano. L'incendio è domato e i cittadini ti ringraziano.", "money": [10, 25], "rep": {"cittadini": 5}},
+         "fail": {"text": "Una trave cede e ti investe di scintille. Ti scotti, ma il fuoco viene domato lo stesso.", "health": -8, "rep": {"cittadini": 2}}},
+        {"label": "Approfitta della confusione", "tip": "Svuoti qualche tasca e cassetto. È un crimine.",
+         "result": {"text": "Mentre tutti guardano le fiamme, rubi quel che puoi. Qualcuno ti ha visto.", "money": [25, 70], "heat": 12, "rep": {"cittadini": -5, "legge": -3}}},
+        {"label": "Guarda da lontano", "tip": "",
+         "result": {"text": "Osservi il fumo salire. La città se la caverà."}}
+      ]
+    },
+    {
+      "id": "assault",
+      "title": "Aggressione",
+      "weight": 3,
+      "text": "In un vicolo senti grida soffocate: due banditi stanno malmenando un viandante e frugandogli nelle tasche.",
+      "options": [
+        {"label": "Intervieni", "tip": "Scontro con i banditi.",
+         "result": {"text": "Ti getti nella mischia: i banditi mollano la vittima e si voltano verso di te.", "combat": {"enemy": "bandito", "count": [1, 2], "title": "Aggressione nel vicolo"}, "rep": {"cittadini": 3, "legge": 2}, "money": [5, 20]}},
+        {"label": "Spaventali con un colpo in aria", "tip": "Serve un'arma da fuoco. Prova di Mira.", "firearm": true,
+         "check": {"stat": "mira", "base": 0.45, "per_stat": 0.05},
+         "ok": {"text": "Il colpo esplode sopra le loro teste: i banditi se la danno a gambe. Il viandante ti dà quel che ha.", "money": [10, 30], "rep": {"cittadini": 4, "legge": 3}},
+         "fail": {"text": "I banditi non si fanno impressionare e ti sparano contro.", "health": -6, "rep": {"cittadini": 1}}},
+        {"label": "Tira dritto", "tip": "",
+         "result": {"text": "Acceleri il passo. Le grida si spengono dietro di te.", "rep": {"cittadini": -2}}}
+      ]
+    },
+    {
+      "id": "caravan",
+      "title": "Arriva una carovana",
+      "weight": 3,
+      "town_only": false,
+      "text": "Una lunga carovana di carri si ferma ai margini della strada. Il capocarovana scende, si asciuga la fronte e squadra i passanti.",
+      "options": [
+        {"label": "Compra merci a metà prezzo ($40)", "tip": "Le rivendi in città con un buon margine. Dipende dal mercato.", "min_money": 40,
+         "check": {"stat": "carisma", "base": 0.55, "per_stat": 0.04},
+         "ok": {"text": "Strappi un ottimo affare e rivendi tutto in giornata. Guadagno netto.", "money": [30, 80]},
+         "fail": {"text": "Metà delle casse è guasta dal viaggio. Ci rimetti.", "money": [-40, -15]}},
+        {"label": "Offriti come scorta", "tip": "Serve un'arma da fuoco. Paga bene, ma è rischioso.", "firearm": true,
+         "check": {"stat": "mira", "base": 0.5, "per_stat": 0.05},
+         "ok": {"text": "Scorti la carovana fino al prossimo guado senza guai. Il capocarovana paga.", "money": [35, 70], "rep": {"commercianti": 3}},
+         "fail": {"text": "Dei banditi attaccano la carovana! Ti trovi nel mezzo.", "combat": {"enemy": "bandito", "count": [1, 2], "title": "Assalto alla carovana"}, "money": [15, 30]}},
+        {"label": "Assalta la carovana", "tip": "Crimine: bottino ricco, guardie armate.", "firearm": true,
+         "result": {"text": "Punti l'arma sul capocarovana: le guardie reagiscono subito.", "combat": {"enemy": "bandito", "count": [2, 3], "title": "Assalto alla carovana"}, "money": [60, 140], "heat": 22, "rep": {"commercianti": -8, "legge": -6, "gang": 3}}},
+        {"label": "Lascia perdere", "tip": "",
+         "result": {"text": "Guardi la carovana ripartire sollevando polvere."}}
+      ]
+    },
+    {
+      "id": "random_duel",
+      "title": "Un pistolero ti sfida",
+      "weight": 2,
+      "town_only": true,
+      "hours": [11, 14],
+      "text": "Un forestiero con due pistole sui fianchi ti sbarra la strada: \"Dicono che sei veloce. Voglio vedere.\"",
+      "options": [
+        {"label": "Accetta la sfida", "tip": "Serve un'arma da fuoco.", "firearm": true,
+         "result": {"text": "Annuisci. La gente si fa da parte e la strada si svuota.", "duel": true}},
+        {"label": "Rifiuta", "tip": "Costa un po' di reputazione.",
+         "result": {"text": "Alzi le mani e tiri dritto. Il forestiero sputa a terra.", "rep": {"cittadini": -2, "gang": -2}}}
+      ]
+    },
+    {
+      "id": "stranger",
+      "title": "Incontro misterioso",
+      "weight": 2,
+      "text": "Un uomo avvolto in un poncho consunto ti affianca senza far rumore. \"Ho qualcosa che potrebbe farti comodo,\" sussurra. \"Per cinquanta dollari.\"",
+      "options": [
+        {"label": "Paga i cinquanta dollari", "tip": "Un pacco sigillato: potrebbe valere molto, o niente.", "min_money": 50,
+         "check": {"stat": "carisma", "base": 0.45, "per_stat": 0.03},
+         "ok": {"text": "Dentro il pacco c'è un'arma ben tenuta. Lo straniero è già sparito.", "money": [-50, -50], "item": "weapon"},
+         "fail": {"text": "Il pacco è pieno di sassi. Dello straniero, nemmeno l'ombra.", "money": [-50, -50]}},
+        {"label": "Ascolta la sua storia", "tip": "Gratis. Una mancia dallo sconosciuto, forse.",
+         "check": {"stat": "carisma", "base": 0.4, "per_stat": 0.05},
+         "ok": {"text": "Ti racconta di un vecchio filone d'argento e ti lascia qualche moneta per l'ascolto.", "money": [8, 25]},
+         "fail": {"text": "Parla a vanvera per mezz'ora e poi si dilegua. Hai perso tempo."}},
+        {"label": "Allontanati", "tip": "",
+         "result": {"text": "Ti volti e te ne vai. Quando guardi indietro, l'uomo non c'è più."}}
+      ]
+    }
+  ]
+}

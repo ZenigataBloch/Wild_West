@@ -2,7 +2,7 @@
 
 ## Vertical Slice Roadmap
 
-**Data:** 16 ottobre 2026
+**Data:** 17 ottobre 2026
 
 ---
 
@@ -63,6 +63,16 @@ Alla fine di ogni feature:
 Formato finale:
 
 fatto: X, file: Y
+
+Versione visibile: a ogni feature aggiornare `GAME_VERSION` in `scripts/ui/player_hud.gd`; l'HUD la mostra in alto a destra.
+
+---
+
+# Stato avanzamento
+
+- Completate le Feature 1-22 (Fase 1, Fase 2, Fase 3, Fase 4, Proprietà, sistema gang, criminalità, sistema legge ed eventi casuali), più le correzioni di collegamento e di UI elencate in `recap.md`.
+- Versione attuale: **Feature 22**. Le feature della roadmap sono completate; la prossima è la Feature 23 (da definire: salvataggio e polish), solo dopo il comando PROSEGUI.
+- Le feature 17, 18, 19 e 20 hanno già UI dedicate (banca con prestiti, pannello proprietà, pannello bande e reputazione con tasto N, pannello malaffare con tasto C).
 
 ---
 

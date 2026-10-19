@@ -1,0 +1,27 @@
+{
+  "noise": { "height_freq": 0.00085, "moist_freq": 0.0011 },
+  "town_flat": { "inner": 260, "outer": 1300 },
+  "river": {
+    "min_offset": 450, "max_offset": 1300, "meander": 380,
+    "half_width": [34, 50], "bridge_margin": 36
+  },
+  "washes": { "count_min": 1, "count_max": 2, "half_width": [14, 24], "min_town_dy": 650 },
+  "trails": { "main_half_width": 24, "branch_half_width": 17, "poi_half_width": 12, "branches_min": 2, "branches_max": 3 },
+  "pois": {
+    "count_min": 6, "count_max": 9, "min_town_dist": 950, "min_sep": 800,
+    "kinds": {
+      "windmill":  { "weight": 3, "radius": 150 },
+      "ranch":     { "weight": 3, "radius": 270 },
+      "graveyard": { "weight": 2, "radius": 180 },
+      "camp":      { "weight": 3, "radius": 130 },
+      "ruins":     { "weight": 2, "radius": 130 },
+      "oasis":     { "weight": 2, "radius": 170 },
+      "wreck":     { "weight": 2, "radius": 110 },
+      "chapel":    { "weight": 2, "radius": 150 }
+    }
+  },
+  "props": {
+    "candidates": 15000, "town_margin": 150,
+    "formations_min": 14, "formations_max": 22, "boulders": 45
+  }
+}

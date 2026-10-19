@@ -677,7 +677,7 @@ static func fight_group(g: Dictionary) -> Array:
 	var size: int = mini(clampi(lo + floori(float(n) / float(per)), lo, hi), n)
 	var ids: Array = []
 	if n >= int(e.get("boss_min_members", 6)) and _rng.randf() < float(e.get("boss_chance", 0.25)):
-		ids.append("capobanda")
+		ids.append("bandito_capo")
 		size -= 1
 	for i in maxi(size, 1):
 		ids.append("bandito")
@@ -802,7 +802,7 @@ static func on_clash(gang_id: String, outcome: String, enemy_ids: Array, ally_id
 	var v: Dictionary = {"gang": g["name"], "boss": g["boss"]}
 	match outcome:
 		"won":
-			var boss_down: bool = enemy_ids.has("capobanda")
+			var boss_down: bool = enemy_ids.has("bandito_capo")
 			var killed: int = enemy_ids.size() - (1 if boss_down else 0)
 			_lose_members(g, killed)
 			v["killed"] = enemy_ids.size()

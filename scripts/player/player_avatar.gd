@@ -16,6 +16,7 @@ var _bounds: Rect2 = Rect2()
 var _camera: Camera2D
 var _target: Interactable = null
 var _target_tick: int = 0
+var _cs: CharacterSprite = null
 
 func _ready() -> void:
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
@@ -29,6 +30,12 @@ func _ready() -> void:
 	_camera.position_smoothing_enabled = true
 	_camera.position_smoothing_speed = 8.0
 	add_child(_camera)
+	_cs = CharacterSprite.new()
+	if _cs.setup(CharacterSprite.player_colors()):
+		add_child(_cs)
+	else:
+		_cs.free()
+		_cs = null
 
 ## Posiziona il giocatore e imposta i limiti dell'area esplorabile.
 func setup(bounds: Rect2, spawn: Vector2) -> void:
@@ -62,6 +69,8 @@ func _physics_process(_delta: float) -> void:
 		facing = dir
 		queue_redraw()   # l'aspetto dipende solo dalla direzione: si ridisegna solo quando cambia
 	move_and_slide()
+	if _cs != null:
+		_cs.face(facing, dir != Vector2.ZERO)
 	if _bounds.size != Vector2.ZERO:
 		global_position = global_position.clamp(
 			_bounds.position + Vector2(RADIUS, RADIUS),
@@ -108,6 +117,8 @@ func _set_zoom(z: float) -> void:
 
 # Aspetto del giocatore (disegnato da codice, sostituibile con sprite).
 func _draw() -> void:
+	if _cs != null:
+		return
 	# ombra a terra
 	draw_set_transform(Vector2(0, 12), 0.0, Vector2(1.0, 0.45))
 	draw_circle(Vector2.ZERO, 15.0, Color(0, 0, 0, 0.28))

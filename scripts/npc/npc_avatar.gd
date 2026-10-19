@@ -8,6 +8,8 @@ signal talk_requested(npc_id: String)
 
 @export var player_group: StringName = &"player"
 
+const NAME_SHOW_DIST := 260.0
+
 var npc: Dictionary = {}
 
 var _inside := false
@@ -17,6 +19,9 @@ var _indoors := false
 var _walking := false
 var _walk_t := 0.0
 var _facing := 1.0
+var _focus_tick := 0
+var _cs: CharacterSprite = null
+var _player: Node2D = null
 
 
 func setup(data: Dictionary) -> void:
@@ -40,6 +45,13 @@ func setup(data: Dictionary) -> void:
 	_name_tag.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_name_tag.custom_minimum_size = Vector2(160, 0)
 	_name_tag.position = Vector2(-80, -42)
+	_cs = CharacterSprite.new()
+	if _cs.setup(CharacterSprite.colors_for(data)):
+		add_child(_cs)
+		_name_tag.position = Vector2(-80, -60)
+	else:
+		_cs.free()
+		_cs = null
 	_name_tag.z_index = 8
 	add_child(_name_tag)
 
@@ -50,7 +62,8 @@ func setup(data: Dictionary) -> void:
 	_prompt.text = "[E] Parla con %s" % String(data["name"]).split(" ")[0]
 	_prompt.custom_minimum_size = Vector2(170, 0)
 	_prompt.position = Vector2(-85, 22)
-	_prompt.z_index = 10
+	_prompt.z_as_relative = false
+	_prompt.z_index = 100
 	_prompt.visible = false
 	add_child(_prompt)
 
@@ -61,7 +74,7 @@ func setup(data: Dictionary) -> void:
 
 
 func _draw() -> void:
-	if npc.is_empty():
+	if npc.is_empty() or _cs != null:
 		return
 	var shirt := Color(npc["shirt"])
 	var skin := Color(npc["skin"])
@@ -98,17 +111,53 @@ func _is_player(body: Node) -> bool:
 func _on_body_entered(body: Node) -> void:
 	if _is_player(body):
 		_inside = true
-		_prompt.visible = true
+		add_to_group(&"interact_cand")
+		_update_focus()
 
 
 func _on_body_exited(body: Node) -> void:
 	if _is_player(body):
 		_inside = false
+		remove_from_group(&"interact_cand")
 		_prompt.visible = false
 
 
+# Ogni 6 fotogrammi fisici: il nome si vede solo se il giocatore è vicino e il suggerimento
+# [E] compare solo sul candidato più vicino (NPC o ingresso), così le targhe non si sovrappongono.
+func _physics_process(_delta: float) -> void:
+	_focus_tick += 1
+	if _focus_tick % 6 != 0 or _indoors:
+		return
+	if _player == null or not is_instance_valid(_player):
+		_player = get_tree().get_first_node_in_group(player_group) as Node2D
+	if _player == null:
+		return
+	_name_tag.visible = global_position.distance_to(_player.global_position) < NAME_SHOW_DIST
+	if _inside:
+		_update_focus()
+
+
+func _has_focus() -> bool:
+	if _player == null or not is_instance_valid(_player):
+		_player = get_tree().get_first_node_in_group(player_group) as Node2D
+	if _player == null:
+		return true
+	var mine := global_position.distance_squared_to(_player.global_position)
+	for n in get_tree().get_nodes_in_group(&"interact_cand"):
+		if n == self:
+			continue
+		var d := (n as Node2D).global_position.distance_squared_to(_player.global_position)
+		if d < mine or (is_equal_approx(d, mine) and n.get_instance_id() < get_instance_id()):
+			return false
+	return true
+
+
+func _update_focus() -> void:
+	_prompt.visible = _inside and _has_focus()
+
+
 func _unhandled_input(event: InputEvent) -> void:
-	if not _inside:
+	if not _inside or not _prompt.visible:
 		return
 	var pressed := false
 	if InputMap.has_action("interact"):
@@ -128,11 +177,14 @@ func set_indoors(indoors: bool) -> void:
 	set_process_unhandled_input(not indoors)
 	if indoors:
 		_inside = false
+		remove_from_group(&"interact_cand")
 		_prompt.visible = false
 
 
 func set_walking(walking: bool) -> void:
 	_walking = walking
+	if _cs != null:
+		_cs.face(Vector2(_facing, 0.0) if walking else Vector2.DOWN, walking)
 	set_process(walking)
 	if not walking:
 		_walk_t = 0.0
@@ -145,6 +197,8 @@ func set_facing(dir_x: float) -> void:
 	var f := 1.0 if dir_x > 0.0 else -1.0
 	if f != _facing:
 		_facing = f
+		if _cs != null and _walking:
+			_cs.face(Vector2(_facing, 0.0), true)
 		queue_redraw()
 
 

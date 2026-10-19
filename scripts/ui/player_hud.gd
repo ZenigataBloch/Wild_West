@@ -57,7 +57,7 @@ func _ready() -> void:
 	_refresh_debt()
 	_refresh_property()
 
-const GAME_VERSION := "Feature 27"
+const GAME_VERSION := "Mappa 1"
 
 # Colori della barra della salute: sana, ferita, grave.
 const HP_OK := Color(0.35, 0.48, 0.18)

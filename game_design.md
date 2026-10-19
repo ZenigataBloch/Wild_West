@@ -70,8 +70,8 @@ Versione visibile: a ogni feature aggiornare `GAME_VERSION` in `scripts/ui/playe
 
 # Stato avanzamento
 
-- Completate le Feature 1-22 (Fase 1, Fase 2, Fase 3, Fase 4, Proprietà, sistema gang, criminalità, sistema legge ed eventi casuali), più le correzioni di collegamento e di UI elencate in `recap.md`.
-- Versione attuale: **Feature 22**. Le feature della roadmap sono completate; la prossima è la Feature 23 (da definire: salvataggio e polish), solo dopo il comando PROSEGUI.
+- Completate le Feature 1-27 (Fase 1, Fase 2, Fase 3, Fase 4, Proprietà, sistema gang, criminalità, sistema legge, eventi casuali salvataggio, grafica degli eventi schermata di morte e menu di gioco, polish di UI, logica e grafica), più le correzioni di collegamento e di UI elencate in `recap.md`.
+- Versione attuale: **Feature 27**. Le feature della roadmap sono completate; la prossima è la Feature 28 (da definire), solo dopo il comando PROSEGUI.
 - Le feature 17, 18, 19 e 20 hanno già UI dedicate (banca con prestiti, pannello proprietà, pannello bande e reputazione con tasto N, pannello malaffare con tasto C).
 
 ---
@@ -432,6 +432,36 @@ Esempi:
 - carovana
 - duello casuale
 - incontro misterioso
+
+---
+
+# Feature 23 — Salvataggio e caricamento
+
+F5 salva, F6 carica il salvataggio più recente (era F9: l'editor di Godot lo intercettava e fermava il tempo), autosalvataggio a ogni nuovo giorno. Si salva solo lo stato che cambia (il mondo si rigenera dal seed).
+
+---
+
+# Feature 24 — Grafica degli eventi in mappa
+
+Fuoco, rapinatori, carovana, rissa, duellante e straniero compaiono in strada durante gli eventi casuali.
+
+---
+
+# Feature 25 — Schermata di morte
+
+A salute 0 il gioco si ferma: carica l'ultimo salvataggio o nuova partita.
+
+---
+
+# Feature 26 — Menu di gioco e comandi
+
+F1 apre un menu con l'elenco dei comandi e i pulsanti Riprendi, Salva, Carica.
+
+---
+
+# Feature 27 — Miglioramento UI, ottimizzazione logica e abbellimento grafico
+
+HUD e messaggi in stile western con animazioni, aggiornamenti a evento invece che a ogni fotogramma, terreno, strada e scenario rifiniti, luci notturne, vignettatura. Nessuna nuova meccanica di gioco.
 
 ---
 

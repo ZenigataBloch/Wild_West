@@ -14,6 +14,7 @@ extends Node2D
 ## Se muori (salute 0) compare la schermata di morte: carica l'ultimo salvataggio o nuova partita (Feature 25).
 ## F5 salva la partita, F6 carica il salvataggio più recente; autosalvataggio a ogni nuovo giorno (Feature 23).
 ## Feature 27: pannello orario in stile western, terreno e strada rifiniti, luci notturne, vignettatura.
+## Mappa 1: mappa procedurale (MapView): biomi, fiume e ponte, sentieri, formazioni rocciose, luoghi di interesse.
 
 const CONFIG_PATH := "res://data/world_config.json"
 const AvatarScript := preload("res://scripts/player/player_avatar.gd")
@@ -22,7 +23,6 @@ const PromptScript := preload("res://scripts/ui/interaction_hud.gd")
 const VIGNETTE_SHADER := preload("res://shaders/screen_vignette.gdshader")
 
 var town: Dictionary = {}
-var scenery: Array = []
 var bounds: Rect2 = Rect2()
 
 var avatar
@@ -33,7 +33,7 @@ var _modulate: CanvasModulate
 var _info: Label
 var _info_hint: Label
 var _night: NightLights
-var _ground: Array = []   # chiazze di terra, ciuffi e sassi (solo grafica, dipendono dal seed)
+var _map: MapView
 var _last_light_hour: float = -1.0
 var _town_root: Node2D
 var _buildings: BuildingManager
@@ -136,19 +136,21 @@ func _new_game(forced_seed: int) -> void:
 	BuildingActions.reset()
 	PropertySystem.reset()
 	town = TownGenerator.generate(_town_cfg)
-	scenery = SceneryGenerator.generate(_world_cfg, town)
 
 	var origin := Vector2(town["origin"][0], town["origin"][1])
 	var hw: float = _world_cfg["half_width"]
 	var hh: float = _world_cfg["half_height"]
 	bounds = Rect2(origin.x - hw, origin.y - hh, hw * 2.0, hh * 2.0)
-	_ground = _make_ground()
+	if _map != null:
+		_map.queue_free()
+	_map = MapView.new()
+	add_child(_map)
+	_map.build(bounds, town)
 
 	_build_town_nodes()
 	_night.setup(_buildings.buildings, avatar)
 	avatar.setup(bounds, origin)
 	_refresh_info()
-	queue_redraw()
 
 # Lotti solidi, edifici (Feature 5), NPC (Feature 6-8); i lotti ancora liberi vanno in vendita (Feature 18).
 func _build_town_nodes() -> void:
@@ -175,7 +177,9 @@ func _build_town_nodes() -> void:
 	_quests = QuestManager.new()
 	_town_root.add_child(_quests)
 	_quests.message.connect(_prompt_hud.show_message)
-	_quests.setup(avatar, bounds, Vector2(town["origin"][0], town["origin"][1]), rects)
+	var quest_avoid: Array[Rect2] = rects.duplicate()
+	quest_avoid.append_array(_map.avoid_rects)
+	_quests.setup(avatar, bounds, Vector2(town["origin"][0], town["origin"][1]), quest_avoid)
 
 	_combat = CombatManager.new()
 	_town_root.add_child(_combat)
@@ -208,6 +212,7 @@ func _build_town_nodes() -> void:
 
 	var avoid: Array[Rect2] = rects.duplicate()
 	avoid.append(Rect2(st[0], st[1], st[2], st[3]))
+	avoid.append_array(_map.avoid_rects)
 	_jobs.set_world(_buildings.buildings, bounds, avoid)
 
 	_gangs = GangManager.new()
@@ -314,124 +319,3 @@ func _add_vignette() -> void:
 	mat.set_shader_parameter("strength", float(WesternTheme.config()["shader"]["vignette"]) + 0.1)
 	rect.material = mat
 	layer.add_child(rect)
-
-
-# Chiazze di terra chiara/scura, ciuffi d'erba secca e sassi sulla strada. Canale proprio del seed:
-# non altera città e scenario già generati.
-func _make_ground() -> Array:
-	var rng := WorldSeed.rng_for("ground")
-	var items: Array = []
-	var area := bounds.grow(-40.0)
-	for i in 200:
-		items.append({
-			"kind": "chiazza",
-			"pos": Vector2(rng.randf_range(area.position.x, area.end.x), rng.randf_range(area.position.y, area.end.y)),
-			"r": rng.randf_range(40.0, 150.0),
-			"light": rng.randf() < 0.5,
-		})
-	for i in 300:
-		items.append({
-			"kind": "ciuffo",
-			"pos": Vector2(rng.randf_range(area.position.x, area.end.x), rng.randf_range(area.position.y, area.end.y)),
-			"k": rng.randf_range(0.7, 1.3),
-		})
-	var s: Array = town["street"]
-	for i in 90:
-		items.append({
-			"kind": "sasso",
-			"pos": Vector2(rng.randf_range(s[0], s[0] + s[2]), rng.randf_range(s[1] + 6.0, s[1] + s[3] - 6.0)),
-			"r": rng.randf_range(1.5, 3.5),
-		})
-	return items
-
-
-# Grafica del mondo disegnata da codice (sostituibile con sprite): terreno, strada, lotti e scenario.
-func _draw() -> void:
-	if town.is_empty():
-		return
-	draw_rect(bounds.grow(1500.0), Color("#c9a66b"))                      # terreno
-	_draw_ground()
-	draw_rect(bounds, Color("#3b2614"), false, 8.0)                       # limite dell'area
-	var s: Array = town["street"]
-	var street := Rect2(s[0], s[1], s[2], s[3])
-	draw_rect(street, Color("#9c7a4a"))                                   # strada principale
-	_draw_street_details(street)
-	for lot in town["lots"]:
-		var r: Array = lot["rect"]
-		draw_rect(Rect2(r[0], r[1], r[2], r[3]), Color("#6b4a2b"))
-		draw_rect(Rect2(r[0], r[1], r[2], r[3]), Color("#3b2614"), false, 4.0)
-	for prop in scenery:
-		_draw_prop(prop)
-
-
-func _draw_ground() -> void:
-	var light := Color(0.93, 0.80, 0.55, 0.22)
-	var dark := Color(0.62, 0.46, 0.27, 0.20)
-	var tuft := Color("#8d7a3c")
-	for g in _ground:
-		var p: Vector2 = g["pos"]
-		match g["kind"]:
-			"chiazza":
-				draw_set_transform(p, 0.0, Vector2(1.0, 0.45))
-				draw_circle(Vector2.ZERO, float(g["r"]), light if g["light"] else dark)
-			"ciuffo":
-				var k: float = g["k"]
-				draw_set_transform(p, 0.0, Vector2.ONE)
-				draw_line(Vector2.ZERO, Vector2(-4, -9) * k, tuft, 1.5)
-				draw_line(Vector2.ZERO, Vector2(0, -12) * k, tuft, 1.5)
-				draw_line(Vector2.ZERO, Vector2(4, -9) * k, tuft, 1.5)
-			"sasso":
-				draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
-				draw_circle(p, float(g["r"]), Color(0.40, 0.30, 0.20, 0.5))
-	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
-
-
-# Marciapiedi di legno negli 10 px liberi tra strada e lotti, bordi e solchi delle ruote.
-func _draw_street_details(street: Rect2) -> void:
-	var wood := Color("#7a5632")
-	var plank := Color(0, 0, 0, 0.28)
-	for sy in [street.position.y - 10.0, street.end.y]:
-		var y: float = sy
-		draw_rect(Rect2(street.position.x, y, street.size.x, 10.0), wood)
-		var x := street.position.x
-		while x < street.end.x:
-			draw_line(Vector2(x, y), Vector2(x, y + 10.0), plank, 1.0)
-			x += 22.0
-	var edge := Color("#6e5230")
-	draw_line(street.position, Vector2(street.end.x, street.position.y), edge, 3.0)
-	draw_line(Vector2(street.position.x, street.end.y), street.end, edge, 3.0)
-	var rut := Color(0.45, 0.32, 0.18, 0.55)
-	for fy in [0.36, 0.64]:
-		var ry: float = street.position.y + street.size.y * float(fy)
-		draw_dashed_line(Vector2(street.position.x + 20.0, ry), Vector2(street.end.x - 20.0, ry), rut, 3.0, 26.0)
-
-
-func _draw_prop(prop: Dictionary) -> void:
-	var p := Vector2(prop["pos"][0], prop["pos"][1])
-	var k: float = prop["size"]
-	match prop["type"]:
-		"cactus":
-			var g := Color("#3f7a3a")
-			draw_set_transform(p + Vector2(4, 1) * k, 0.0, Vector2(1.0, 0.35))
-			draw_circle(Vector2.ZERO, 16 * k, Color(0, 0, 0, 0.22))
-			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
-			draw_rect(Rect2(p.x - 5 * k, p.y - 34 * k, 10 * k, 34 * k), g)
-			draw_rect(Rect2(p.x - 16 * k, p.y - 24 * k, 12 * k, 5 * k), g)
-			draw_rect(Rect2(p.x - 16 * k, p.y - 34 * k, 5 * k, 15 * k), g)
-			draw_rect(Rect2(p.x + 4 * k, p.y - 18 * k, 12 * k, 5 * k), g)
-			draw_rect(Rect2(p.x + 11 * k, p.y - 28 * k, 5 * k, 15 * k), g)
-			draw_rect(Rect2(p.x - 5 * k, p.y - 34 * k, 3 * k, 34 * k), Color("#58a04c"))   # lato illuminato
-		"roccia":
-			draw_set_transform(p + Vector2(3, 8) * k, 0.0, Vector2(1.0, 0.35))
-			draw_circle(Vector2.ZERO, 16 * k, Color(0, 0, 0, 0.22))
-			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
-			draw_circle(p, 14 * k, Color("#7d746a"))
-			draw_circle(p + Vector2(-3, -3) * k, 8 * k, Color("#9a9086"))
-			draw_circle(p + Vector2(-5, -6) * k, 3 * k, Color("#b8afa4"))
-		"cespuglio":
-			draw_set_transform(p + Vector2(2, 7) * k, 0.0, Vector2(1.0, 0.35))
-			draw_circle(Vector2.ZERO, 13 * k, Color(0, 0, 0, 0.2))
-			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
-			draw_circle(p, 10 * k, Color("#8a7a45"))
-			draw_circle(p + Vector2(6, 2) * k, 7 * k, Color("#7a6a3a"))
-			draw_circle(p + Vector2(-3, -3) * k, 4 * k, Color("#a3924f"))

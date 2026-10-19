@@ -275,3 +275,114 @@
 - Modifiche a codice esistente: `crime_panel.gd` (`alert_status`, cronologia opzionale, descrizione di gruppo vuota omessa), `crime_system.gd` (`has_firearm()` condivisa), `crime.json` (gruppo UI `event`), `world.gd` (`var _events: EventManager`, creazione dopo `_law` con `setup(avatar, origin, _combat, _duels)`, tasto Y nel commento), `player_hud.gd` ("Feature 22").
 - Assunzioni da verificare: `DuelManager.challenge_stranger()`, `WeaponDB.random_id(rng)`/`name_of` (usate già in `world.gd`), `PlayerState.add_item` che restituisce 0 se riesce; l'esito degli scontri non viene letto (le ricompense e la reputazione si applicano alla scelta); gli eventi sono solo testo e scelte, senza grafica in strada (nessun fuoco o carovana disegnati).
 - Pronto per: chiusura del vertical slice (Fase 6). Restano da fare salvataggio, grafica degli eventi in mappa (fuoco, carovana, rapinatori) e polish generale (Feature 30+).
+
+## Feature 23 — Salvataggio e caricamento ✅
+- `SaveSystem` (`scripts/save/save_system.gd`, logica senza UI): `capture(avatar, versione)` raccoglie lo stato, `apply(data, avatar)` lo riapplica, `write/read(path)`, `newest()` (il più recente tra manuale e automatico), `describe(data)`. Formato `var_to_str` (testo leggibile, conserva int/float, Vector2 e chiavi intere come i lotti), campo `format` = 1; file mancanti, rovinati o di altro formato vengono ignorati. Scrittura su file temporaneo e poi rinominato.
+- Il mondo (città, NPC, lotti, posizione dei rifugi) si rigenera dallo stesso seed; si salva solo ciò che cambia: tempo (giorno, ora, velocità), giocatore (nome, salute, soldi, statistiche, zaino, arma, posizione), ferite, reputazione e informazioni (`DialogueState`), NPC (`relationship`, `met`, `dialog_flags`), missioni, lavori, mercato, banca, proprietà, bande (con cronaca e rinascite), criminalità, legge.
+- `SaveManager` (`scripts/save/save_manager.gd`, creato da `world.gd`): **F5** salva in `user://savegame.sav`, **F6** (fino alla Feature 26 era F9, vedi la correzione sotto) carica il più recente tra quello e `user://autosave.sav`, autosalvataggio a ogni cambio di giorno (non se la salute è 0). Niente salvataggi o caricamenti mentre un pannello ha messo il gioco in pausa. Messaggi a schermo per esito.
+- `world.gd`: `var _save`, `load_game(data)` (= `_new_game(seed)` + `SaveSystem.apply`), comandi nel commento di testa e nella riga informativa. `player_hud.gd`: `GAME_VERSION` = "Feature 23".
+- Dopo il caricamento `QuestState`, `PropertySystem` e `GangSystem` aumentano `version` per far ricostruire grafica e suggerimenti; `GangSystem._rng` viene ricreato (senza, la simulazione delle bande resterebbe ferma).
+- Non salvati (ripartono da zero): contatori interni dei manager (`EventManager._day/_day_n`, `DuelManager._count/_cooldown_until_day`, pause degli incontri con le bande, inseguimento in corso), posizione degli NPC (seguono la routine dell'ora), pannelli aperti.
+- **Assunzioni da verificare** (non testate in Godot): `var_to_str`/`str_to_var` con array tipizzati (`Array[Dictionary]`), `DirAccess.open("user://").rename`, accesso a `GameTime._compute_phase()` e ai campi `_` dei sistemi statici, `HudScript.GAME_VERSION` dalla costante precaricata.
+- Pronto per: grafica degli eventi in mappa e polish generale (Feature 24+).
+
+## Feature 24 — Grafica degli eventi in mappa ✅
+- `EventSceneView` (`scripts/events/event_scene_view.gd`, `Node2D` disegnato a codice, animato): sei scene — `fire` (legna, fiamme che oscillano, fumo, alone), `robbers` (due mascherati con sacco e «!»), `caravan` (carro con telone, ruote che girano, due buoi, carrettiere), `brawl` (due uomini che si azzuffano, polvere), `duelist` (uomo con la mano sulla pistola), `stranger` (figura incappucciata con lanterna). Svanisce da sola dopo `seconds` (ultimi 4 s in dissolvenza).
+- Dati: ogni evento di `data/events.json` ha `"scene": {"kind", "seconds": 60, "distance": 170}`; per nuovi eventi basta aggiungere la riga.
+- `EventManager`: `_spawn_scene(ev)` chiamato da `_start`; la scena compare davanti al giocatore (direzione `facing`, a `distance` px) dentro `_town_root` (quindi sparisce con R/caricamento), resta dopo la chiusura del pannello; una nuova scena sostituisce la precedente.
+- `player_hud.gd`: `GAME_VERSION` = "Feature 24".
+- Assunzioni da verificare (non testate in Godot): `avatar.facing` letto con `get("facing")`, `get_parent()` di EventManager = `_town_root`, `ThemeDB.fallback_font` per il «!».
+- Pronto per: polish generale (Feature 25+).
+
+## Feature 25 — Schermata di morte ✅
+- Prima la morte (`PlayerState.player_died`) stampava solo un messaggio in console e il gioco continuava con salute 0. Ora `DeathManager` (`scripts/death/death_manager.gd`, creato da `world.gd`, `PROCESS_MODE_ALWAYS`) mostra una schermata a tutto campo (sfondo rosso scuro, «SEI MORTO», riepilogo con giorno, ora e soldi) e mette il gioco in pausa.
+- Due scelte: «Carica l'ultimo salvataggio (...)» (`SaveSystem.newest()`, disattivata se non ce ne sono) e «Nuova partita». Segnali `load_requested(data)` → `World.load_game`, `new_game_requested` → `_new_game(0)`; la pausa viene tolta solo se l'aveva messa lei.
+- Non cambia lo svenimento (combattimento perso, dissanguamento): lì la salute non scende mai sotto 1 e il personaggio si risveglia in città. La morte vera arriva solo da danni diretti (lavori pericolosi, eventi, crimini, duelli, tasto H di debug).
+- Modifiche: `world.gd` (`var _death`, creazione dopo `_save`, commento di testa), `player_hud.gd` (`GAME_VERSION` = "Feature 25").
+- Assunzioni da verificare (non testate in Godot): `WesternTheme.color("blood"/"parchment")` e `apply` su un Control.
+- Pronto per: polish generale (Feature 26+).
+
+## Feature 26 — Menu di gioco e comandi ✅
+- `GameMenu` (`scripts/menu/game_menu.gd`, creato da `world.gd`, `PROCESS_MODE_ALWAYS`): **F1** apre/chiude un menu a carta con tutti i comandi (movimento, pannelli, partita) e tre pulsanti: «Riprendi [F1]», «Salva [F5]», «Carica [F6]». Il gioco va in pausa mentre è aperto; non si apre se un altro pannello ha già messo il gioco in pausa o se il personaggio è morto.
+- Dati in `data/help.json` (titolo, sottotitolo, sezioni con righe): per nuovi comandi basta il JSON. Salva e Carica chiudono prima il menu (togliendo la pausa) e poi chiamano `SaveManager.save_manual` / `load_latest`, che rifiutano di agire in pausa.
+- Modifiche: `world.gd` (`var _menu`, creazione e collegamento dei segnali dopo `_save`, commento e riga informativa con «F1 menu»), `player_hud.gd` (`GAME_VERSION` = "Feature 26").
+- Scelta: F1 e non Esc, perché Esc chiude già i pannelli e la scheda personaggio (I) non mette in pausa.
+- Assunzioni da verificare (non testate in Godot): `WesternTheme.color("parchment"/"wood"/"ink"/"gold_dark"/"blood")`, `SaveManager.save_manual/load_latest` collegabili come `Callable` a segnali senza argomenti.
+- Pronto per: polish generale (Feature 27+).
+
+## Correzione — Blocco al caricamento con F9 ✅
+- Segnalazione: il primo F9 bloccava il gioco (tutto fermo per qualche secondo); premendo di nuovo il gioco ripartiva.
+- Causa: dopo F9 `Engine.time_scale` valeva 0.0 per circa 2,5 s (i frame giravano, ma ogni `delta` era 0: ora, movimento e `_process` fermi). Nessuno script del progetto imposta `Engine.time_scale`, quindi il valore arrivava da fuori (con ogni probabilità l'editor di Godot, che intercetta i tasti funzione).
+- Soluzione: il caricamento ora è su **F6** (`save_manager.gd`, `game_menu.gd`, `help.json`, riga informativa di `world.gd`). Confermato dall'utente: il blocco non si ripresenta. F5 resta «salva».
+- La diagnostica temporanea (`dump_state`, campioni in `World.load_game`, `_lap` in `SaveSystem.apply`) è stata rimossa nella Feature 27. Resta il collegamento con `CONNECT_DEFERRED` del segnale di caricamento (il caricamento non parte più dentro il gestore del tasto).
+
+## Feature 27 — Miglioramento UI, ottimizzazione logica e abbellimento grafico ✅
+- **Pulizia**: tolta ogni diagnostica del blocco (`SaveManager.dump_state`, `_lap`/`_t0` in `SaveSystem`, prove e campioni in `World.load_game`) e le stampe di debug «Fase:» e «Giorno» in console.
+- **UI**:
+  - `PlayerHud`: pannello e scheda personaggio con `WesternTheme` (legno e oro, titoli `TitleLabel`); icone cuore e moneta (`WesternIcon`); barra della salute a fasce di colore (verde > 60%, ambra > 30%, rossa sotto); lampo rosso sulla barra quando perdi salute, «pop» sui soldi quando cambiano; il cuore pulsa sotto il 25% di salute. Animazioni con modalità pausa «process» (girano anche con un pannello aperto).
+  - `InteractionHud`: i messaggi stanno su una targa di legno (`WesternTheme`) con dissolvenza in entrata (0,15 s) e in uscita (0,35 s); l'API `show_message(testo, secondi)` non cambia.
+  - Riga informativa in basso a sinistra: pannello a due righe, «Città · Giorno N · HH:MM (fase)» più «PAUSA» o «xN» quando serve, e sotto «seed · F1 menu · F5 salva · F6 carica». L'elenco lungo dei comandi è nel menu F1.
+- **Logica**:
+  - `World._process` non ricostruisce più la stringa ogni fotogramma: la riga informativa si aggiorna solo su `minute_changed`, `phase_changed`, cambio velocità/pausa e dopo il caricamento; il colore ambientale solo quando l'ora cambia.
+  - `GameTime.get_light_color` usa colori e ore dei keyframe convertiti una sola volta in `_ready` (prima rifaceva `Color(stringa)` a ogni chiamata). Risultato identico.
+  - `PlayerAvatar`: si ridisegna solo quando cambia la direzione (prima ogni fotogramma fisico); la ricerca del punto interattivo più vicino gira ogni 3 fotogrammi (subito se il giocatore non è attivo) e confronta distanze al quadrato.
+- **Grafica**:
+  - Terreno con chiazze chiare e scure, ciuffi d'erba secca e sassi sulla strada (canale seed `ground`, indipendente da città e scenario); marciapiedi di legno con assi nei 10 px tra strada e lotti, bordi della strada e solchi delle ruote tratteggiati.
+  - Cactus, rocce e cespugli con ombra a terra e lato illuminato.
+  - Giocatore con ombra ellittica, cintura con fibbia, cappello con fascia dorata.
+  - `NightLights` (`scripts/world/night_lights.gd`, creato da `world.gd`): finestre degli edifici che si accendono con il buio e lanterna del giocatore (`PointLight2D` con gradiente radiale generato da codice). L'intensità segue la luminosità del colore ambientale di `GameTime`, quindi non servono orari separati; il crepuscolo accende le luci a metà.
+  - Vignettatura a tutto schermo: `shaders/screen_vignette.gdshader`, `ColorRect` su un `CanvasLayer` di livello 1 (sotto HUD e pannelli, non toccato da `CanvasModulate`), forza = `shader.vignette` di `ui_theme.json` + 0,1.
+- Nuovi file: `scripts/world/night_lights.gd`, `shaders/screen_vignette.gdshader`. Modificati: `world.gd`, `game_time.gd`, `player_avatar.gd`, `player_hud.gd` (`GAME_VERSION` = "Feature 27"), `interaction_hud.gd`, `save_manager.gd`, `save_system.gd`.
+- Scelte: niente nuove feature di gioco, solo resa e prestazioni; gli altri manager con `_process` (banca, economia, proprietà, bande, legge, criminalità) erano già a intervalli o a confronto di un intero, quindi non sono stati toccati.
+- **Assunzioni da verificare** (non testate in Godot): `GradientTexture2D` radiale come texture di `PointLight2D` (energia 0,9 per le finestre e 0,55 per la lanterna: da regolare a occhio), `Color.get_luminance()`, `Tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)`, `draw_dashed_line`, `draw_set_transform` per le ombre ellittiche, `WesternIcon.Kind.HEART/COIN` e `theme_type_variation = &"TitleLabel"` su `Label`.
+- Pronto per: Feature 28 (da definire), solo dopo PROSEGUI.
+
+## Correzione UI — Targhe in mappa sopra i nomi degli NPC ✅
+- Bug: la targa dell'ingresso di un edificio («Banca — Chiuso (apre alle 09:00)») si sovrapponeva al nome di un NPC vicino (es. «Clyde Barlow»): le due scritte si leggevano una sopra l'altra. Causa: targa e nome NPC avevano lo stesso z effettivo (z relativo al genitore), quindi vinceva l'ordine nell'albero.
+- `BuildingEntrance` (`scripts/buildings/building_entrance.gd`): la targa ha `z_as_relative = false` e `z_index = 100` (sempre sopra nomi e personaggi); dopo aver scritto il testo si ridimensiona (`reset_size`) e si ricentra sulla porta, perché i testi lunghi crescevano solo verso destra.
+- `NPCAvatar` (`scripts/npc/npc_avatar.gd`): stessa regola per il suggerimento «[E] Parla con ...» (z assoluto 100).
+- Nessun cambio di `GAME_VERSION` (resta «Feature 27»).
+
+## Bug fixing — Sessione 1 (analisi statica, Godot non disponibile nell'ambiente di analisi)
+- Controlli fatti: riferimenti `Classe.membro` tra tutti gli script (nessun membro inesistente), numero di argomenti delle chiamate statiche, `:=` su valori non tipizzabili, validità dei 22 JSON, id di armi/beni/oggetti/nemici incrociati tra i file di dati, conflitti dei tasti.
+- **Bug corretto**: `GangSystem.fight_group` e l'esito dello scontro usavano l'id nemico `capobanda`, che in `data/combat.json` non esiste (si chiama `bandito_capo`). `CombatSystem` salta in silenzio gli id sconosciuti, quindi il capobanda non compariva mai nello scontro ma la vittoria lo contava come caduto (cambio di comando, stima -10 in più, legge +4). Ora l'id è `bandito_capo` (`scripts/gangs/gang_system.gd`, righe 680 e 805).
+- Nessun altro riferimento errato trovato: coerenti gli id di `weapon_drop`, `start_weapon`, `good` dei negozi e dei lavori, nemici di eventi, lavori e criminalità.
+- Da provare in gioco (non verificabile da analisi statica): le «assunzioni da verificare» elencate nelle Feature 14-27 (luci notturne, `PointLight2D`, `Tween.set_pause_mode`, salvataggio con `var_to_str`, uscita dal combattimento letta da `combat_finished` nelle bande).
+
+## Bug fixing — Targhe sovrapposte (NPC e ingressi) ✅
+- Bug (screenshot): con più NPC vicini comparivano insieme più «[E] Parla con ...» e la targa dell'ingresso, una sopra l'altra e illeggibili; anche i nomi degli NPC ammassati si sovrapponevano. E avrebbe risposto più di un nodo.
+- `NPCAvatar` e `BuildingEntrance` si registrano nel gruppo `interact_cand` quando il giocatore è nella loro area; il suggerimento [E] (e l'input E) resta solo al più vicino al giocatore (ricalcolo ogni 6 fotogrammi fisici). Il nome sopra l'NPC si vede solo entro 260 px dal giocatore (`NAME_SHOW_DIST`).
+- Non testato in Godot: `get_first_node_in_group` del giocatore (gruppo `player`, già impostato da `world.gd`).
+
+## Bug fixing — Targa dell'ingresso sulla strada ✅
+- Bug (screenshot): la targa «[E] Entra — ...» stava dalla parte della strada e copriva NPC e passaggio. `BuildingEntrance`: ora è disegnata sul corpo dell'edificio, oltre la porta (sotto il bordo se l'edificio è a sud della strada, sopra se è a nord; l'altezza reale viene ricalcolata dopo il testo). Mai più sulla strada.
+
+## Grafica — Fase 1: sprite per giocatore e NPC ✅ (prima consegna, da provare in Godot)
+- **Base**: `template_m.jpg` (modello 32x64, 8 colonne x 2 righe) ripulito da sfondo bianco e rumore JPEG, vestito da cowboy (camicia a maniche lunghe, pantaloni, stivali, cappello a tesa larga) e suddiviso in regioni: `assets/characters/man_base.png` (solo ombreggiatura in grigio) e `man_map.png` (regione per pixel: canale rosso = id x 32; 0 fisso/contorni/ombra, 1 pelle, 2 capelli, 3 camicia, 4 pantaloni, 5 stivali, 6 cappello).
+- `shaders/character_palette.gdshader`: ricolora per regione (uniform `c_skin`, `c_hair`, `c_shirt`, `c_pants`, `c_boots`, `c_hat`; `region_map`).
+- `CharacterSprite` (`scripts/world/character_sprite.gd`, `Sprite2D`): `setup(colori)` (false se mancano i file: si ricade sul disegno a codice), `face(direzione, cammina)`, `colors_for(npc)` (pelle, camicia e cappello dai dati dell'NPC; capelli e pantaloni dall'id), `player_colors()`. Camminata a 4 passi in 4 direzioni (sinistra = specchio), fermo = di fronte.
+- `NPCAvatar` e `player_avatar.gd`: usano `CharacterSprite` se disponibile; il nome dell'NPC sale a y -60. Tutto il resto (collisioni, prompt, routine) invariato.
+- Copiati per la fase duelli (non ancora usati): `assets/duel/CowBoy{Idle,Walking,DrawWeapon,HolsterWeapon,Shoot,QuickDrawShot}.png` (48x48 per fotogramma). Crediti in `assets/CREDITS.md`.
+- Limiti noti: tutti gli NPC usano il corpo maschile (i nomi femminili non hanno ancora un'altra sagoma); le mani non hanno un colore proprio (prendono quello della camicia).
+- Assunzioni da verificare in Godot: la mappa e la base importate come PNG senza compressione con perdita; `Sprite2D` con `hframes` passa a `UV` la sotto-regione giusta (la mappa ha le stesse dimensioni); `ResourceLoader.exists` sui PNG importati.
+
+## Grafica — Fase 2: restyle del duello ✅ (prima consegna, da provare in Godot)
+- **Nuovo `DuelFighter`** (`scripts/duel/duel_fighter.gd`, `RefCounted`): duellante animato con i fogli `assets/duel/CowBoy*.png` (48x48, guardano a destra; `facing = -1` li specchia). Animazioni: `idle`, `walk`, `draw`, `shoot`, `quick` (estrazione rapida), `holster`; `hit()` (lampo rosso e rinculo), `fall()` (cade all'indietro in 0,55 s), `muzzle()`/`chest()` per effetti. `available()` è false se mancano i file: in quel caso `DuelPanel` usa ancora le sagome a codice (`_draw_person` invariato).
+- **`DuelPanel`** (`scripts/ui/duel_panel.gd`), modifiche mirate: i duellanti camminano dai lati verso il centro durante l'intro (con polvere), restano in idle durante l'attesa, al SPARA! chi spara per primo usa `quick` e l'altro `draw`; a ogni colpo `shoot`, traccia luminosa, bagliore e fumo dalla canna, scintille rosse e `hit()` sul bersaglio (colpo a vuoto: la traccia prosegue e solleva polvere); chi cade con `fall()`; a fine duello chi è in piedi rinfodera (`holster`). Pubblico con gli stessi sprite in idle (più piccoli, scuri, sfasati, rivolti al centro; la stella dello sceriffo resta). Scenario: mesa lontane, nuvole lente, edifici con falso frontone, insegne («SALOON», «BANCA»), finestre con riflesso, portico, staccionata e botte; erba rotolante durante l'attesa; lampo chiaro al segnale. Scala degli sprite intera (altezza schermo / 150, tra 3 e 8) per restare nitidi; `texture_filter` nearest sul pannello.
+- `player_hud.gd`: `GAME_VERSION` = "Grafica 2".
+- Colori: il giocatore è nel colore originale, l'avversario ha una tinta rossastra (`Color(1, 0.74, 0.64)`).
+- Limiti noti: manca l'animazione «giù» negli sprite (la caduta è una rotazione del fotogramma); nessuna sagoma femminile; il bagliore usa `_flash_p/_flash_o` esistenti.
+- Assunzioni da verificare in Godot: `draw_texture_rect_region` con `draw_set_transform` a scala negativa (specchio) e rotazione; `get_theme_default_font()` sul pannello con tema western; importazione di `CowBoyWalking.png` e `CowBoyQuickDrawShot.png` (non ancora importati nella cache); sincronia tra lo sparo nello sprite `quick` (fotogramma 4-5, ~0,35 s) e il primo evento (0,4 s).
+- Pronto per: Fase 3 grafica (sagome femminili e varianti NPC, oppure grafica degli altri pannelli) o Feature 28, solo dopo PROSEGUI.
+
+## Mappa — Fase 1: mappa procedurale ✅ (prima consegna, da provare in Godot)
+- **Nuovi file**: `data/map_config.json` (parametri), `shaders/terrain.gdshader`, `scripts/world/map_data.gd` (`MapData`), `map_props.gd` (`MapProps`), `prop_painter.gd` (`PropPainter`), `map_chunk.gd`, `map_town_ground.gd`, `map_view.gd` (`MapView`).
+- **`MapData`** (canali seed `map_*`): griglia a celle di 16 px con altezza, umidità, salina, terra battuta e distanze dal bordo di acqua, letti asciutti e sentieri → due texture per lo shader. Genera: **fiume** verticale a est o ovest della città (meandri, larghezza variabile, valle più umida), 1-2 **letti asciutti** (arroyo), **strada principale** che esce da entrambe le estremità della via con 2-3 diramazioni, 6-9 **luoghi di interesse** (mulino a vento, ranch con corral, cimitero «Boot Hill», accampamento, rovine, oasi con stagno, carro rotto, cappella) ciascuno con un sentiero verso la strada, **ponte** dove la strada principale attraversa il fiume e **guado** con pietre per gli altri sentieri.
+- **Shader terreno**: sabbia, macchia, prato, altopiani rossi a strati (altezza > 0,62), salina screpolata, terra battuta intorno alla città, letti asciutti, sentieri a bordo ruvido, acqua con riva bagnata, correnti animate e schiuma. Pixel di 3 px mondo.
+- **`MapProps`**: formazioni rocciose solide (buttes a più livelli, collisione poligonale), 45 massi solidi, vegetazione a gruppi per bioma (saguaro, cactus a botte, fico d'India, agave, cespugli, erba, fiori, pioppi lungo il fiume, alberi morti, ginepri sugli altopiani, canneti, ossa, ruote, erba rotolante, tronchi); arredo della città: lampioni, staccionate per cavalli con cavalli e abbeveratoi, botti e casse nei vicoli, un pozzo, due carri, retrocasa (gabinetti, cataste, fieno, recinti), cartelli col nome della città agli ingressi. Gli arredi non sono solidi (solo formazioni, massi e strutture dei POI).
+- **`MapView`**: z -10 terreno, -5 suolo città (`MapTownGround`: strada, marciapiedi, lotti di terra battuta con erbacce), -1 prop in riquadri da 640 px (`MapChunk`), personaggi sopra. Espone `avoid_rects` (ostacoli, POI, fiume, stagni): `world.gd` li aggiunge alle liste da evitare di missioni, miniera e bande.
+- **`BuildingFacade`** ridisegnata: tetto a tegole/lamiera/assi con colmo e comignolo con fumo, fronte con architrave, dettagli per saloon/banca/sceriffo. Le finestre restano alle stesse coordinate di prima (NightLights).
+- **`world.gd`**: rimossi `_draw`, `_make_ground`, scenario vecchio; ora crea `MapView` in `_new_game`. **Eliminato `scripts/world/scenery_generator.gd`** (cancellarlo anche dal proprio progetto; `scenery_count` in `world_config.json` non serve più). `GAME_VERSION` = "Mappa 1".
+- Limiti noti: nessuna collisione sul fiume (si guada); il mulino non gira; la mappa si rigenera in circa 1 s a ogni nuova partita/caricamento; i personaggi sono sempre sopra i prop (anche sopra le chiome).
+- Da verificare in Godot: compilazione dello shader e dei nuovi script, prestazioni con ~6000 prop, posizione del ponte sul fiume, che la miniera non finisca in acqua.
+- Pronto per: Mappa 2 (animazioni: mulino, fuoco, fumo; luci notturne ai POI e ai lampioni; fauna), oppure Feature 28.

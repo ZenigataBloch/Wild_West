@@ -32,6 +32,19 @@ var _pose_o: String = "ready"
 var _log_lines: Array[String] = []
 var _can_accept: bool = true
 
+# Restyle a sprite (se i file mancano restano le sagome a codice).
+var _fp: DuelFighter
+var _fo: DuelFighter
+var _aud: DuelFighter
+var _clock := 0.0
+var _cue_flash := 0.0
+var _accepted := false
+var _first_shooter := ""
+var _first_shot_done := false
+var _walk_dust := 0.0
+var _parts: Array[Dictionary] = []
+var _tracers: Array[Dictionary] = []
+
 var _title: Label
 var _sub: Label
 var _text: Label
@@ -53,6 +66,11 @@ func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	size = get_viewport_rect().size
 	mouse_filter = Control.MOUSE_FILTER_STOP
+	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	if DuelFighter.available():
+		_fp = DuelFighter.new()
+		_fo = DuelFighter.new()
+		_aud = DuelFighter.new()
 	_build_ui()
 	_show_challenge()
 
@@ -220,6 +238,8 @@ func _on_accept() -> void:
 			GameTime.skip_to_hour(noon)
 	_stage = Stage.INTRO
 	_t = 0.0
+	_accepted = true
+	_play_both("walk")
 	_text.text = DuelDB.text("intro_before" if before else "intro_after")
 	_set_buttons([])
 
@@ -232,6 +252,7 @@ func _on_refuse() -> void:
 func _start_standoff() -> void:
 	_stage = Stage.STANDOFF
 	_t = 0.0
+	_play_both("idle")
 	_text.text = DuelDB.text("standoff")
 	_set_buttons([])
 
@@ -245,6 +266,7 @@ func _begin_resolve(reaction_ms: float, was_foul: bool) -> void:
 	_end_t = 0.0
 	_log_lines.clear()
 	_text.text = ""
+	_start_draws()
 
 
 func _show_result() -> void:
@@ -271,6 +293,7 @@ func _show_result() -> void:
 		lines.append("Reputazione: " + ", ".join(parts))
 	_text.text = "\n".join(lines)
 	_set_buttons([["Continua", _on_continue]])
+	_end_poses()
 	system.apply_results()
 	modulate = Color.WHITE
 
@@ -316,6 +339,12 @@ func _input(event: InputEvent) -> void:
 # --------------------------------------------------------------------- aggiorna
 
 func _process(delta: float) -> void:
+	_clock += delta
+	_cue_flash = maxf(0.0, _cue_flash - delta * 3.0)
+	if _fp != null:
+		_fp.update(delta)
+		_fo.update(delta)
+		_update_fx(delta)
 	_flash_p = maxf(0.0, _flash_p - delta * 4.0)
 	_flash_o = maxf(0.0, _flash_o - delta * 4.0)
 	_shake = maxf(0.0, _shake - delta * 30.0)
@@ -334,6 +363,7 @@ func _process(delta: float) -> void:
 				_big.text = DuelDB.text("cue")
 				_text.text = DuelDB.text("cue_hint")
 				_shake = 6.0
+				_cue_flash = 1.0
 		Stage.CUE:
 			var window := float(DuelDB.section("timing").get("react_window_ms", 1400))
 			if float(Time.get_ticks_msec() - _cue_tick) >= window:
@@ -380,6 +410,7 @@ func _tick_resolve(delta: float) -> void:
 			_pose_o = "down"
 		else:
 			_pose_p = "down"
+	_event_fx(who, kind)
 
 
 # ---------------------------------------------------------------------- disegno
@@ -403,6 +434,7 @@ func _draw() -> void:
 	for i in 4:
 		draw_circle(sun, 70.0 - float(i) * 14.0, Color(1.0, 0.97, 0.80, 0.10 + 0.08 * float(i)))
 	draw_circle(sun, 26.0, Color(1.0, 0.99, 0.88))
+	_draw_backdrop(w, gy)
 	# Terra: sfondo e strada.
 	draw_rect(Rect2(-20, gy - 6, w + 40, h - gy + 26), GROUND_FAR)
 	draw_rect(Rect2(-20, gy + 10, w + 40, h - gy + 10), GROUND)
@@ -412,17 +444,25 @@ func _draw() -> void:
 	_draw_buildings(w, gy)
 	_draw_audience(w, gy)
 
-	var s := clampf(h / 560.0, 0.8, 1.7)
-	_draw_person(Vector2(w * 0.32, gy + 40.0), 1, _pose_p, _flash_p, Color(0.20, 0.30, 0.45), Color(0.18, 0.12, 0.08), s, off)
-	_draw_person(Vector2(w * 0.68, gy + 40.0), -1, _pose_o, _flash_o, Color(0.45, 0.18, 0.15), Color(0.08, 0.06, 0.05), s, off)
+	if _fp != null:
+		_draw_fighters(off)
+	else:
+		var s := clampf(h / 560.0, 0.8, 1.7)
+		_draw_person(Vector2(w * 0.32, gy + 40.0), 1, _pose_p, _flash_p, Color(0.20, 0.30, 0.45), Color(0.18, 0.12, 0.08), s, off)
+		_draw_person(Vector2(w * 0.68, gy + 40.0), -1, _pose_o, _flash_o, Color(0.45, 0.18, 0.15), Color(0.08, 0.06, 0.05), s, off)
 
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	# Vignettatura leggera in alto e in basso.
 	draw_rect(Rect2(0, 0, w, 90), Color(0.1, 0.06, 0.03, 0.25))
 	draw_rect(Rect2(0, h - 210, w, 210), Color(0.1, 0.06, 0.03, 0.25))
+	if _cue_flash > 0.0:
+		draw_rect(Rect2(0, 0, w, h), Color(1.0, 0.97, 0.85, _cue_flash * 0.35))
 
 
 func _draw_buildings(w: float, gy: float) -> void:
+	if _fp != null:
+		_draw_town(w, gy)
+		return
 	var bw := w * 0.20
 	for side in 2:
 		var x0 := 0.0 if side == 0 else w - bw
@@ -439,6 +479,9 @@ func _draw_buildings(w: float, gy: float) -> void:
 
 
 func _draw_audience(w: float, gy: float) -> void:
+	if _aud != null:
+		_draw_audience_sprites(w, gy)
+		return
 	var n := mini(system.audience, int(DuelDB.section("audience").get("max_drawn", 16)))
 	var s := 0.55
 	for i in n:
@@ -498,3 +541,233 @@ func _draw_person(base: Vector2, facing: int, pose: String, flash: float, shirt:
 		draw_line(Vector2(f2 * 10.0, -76), Vector2(f2 * 16.0, -52), shirt.darkened(0.2), 7.0)
 		draw_rect(Rect2(f2 * 12.0 - 4.0, -54, 8, 8), INK)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+
+# ------------------------------------------------------------- restyle a sprite
+
+func _sprite_scale() -> float:
+	return clampf(roundf(size.y / 150.0), 3.0, 8.0)
+
+
+func _walk_k() -> float:
+	if not _accepted:
+		return 0.0
+	if _stage == Stage.INTRO:
+		var dur := maxf(0.1, float(DuelDB.section("timing").get("intro_seconds", 2.4)))
+		var k := clampf(_t / dur, 0.0, 1.0)
+		return 1.0 - (1.0 - k) * (1.0 - k)
+	return 1.0
+
+
+## Piedi del duellante: 0 = giocatore (a sinistra), 1 = avversario (a destra).
+func _fpos(side: int) -> Vector2:
+	var x0 := size.x * (0.17 if side == 0 else 0.83)
+	var x1 := size.x * (0.37 if side == 0 else 0.63)
+	return Vector2(lerpf(x0, x1, _walk_k()), size.y * 0.60 + 40.0)
+
+
+func _play_both(anim: String) -> void:
+	if _fp != null:
+		_fp.play(anim)
+		_fo.play(anim)
+
+
+## Chi spara per primo estrae con la sequenza rapida, l'altro con l'estrazione normale.
+func _start_draws() -> void:
+	if _fp == null:
+		return
+	_first_shooter = ""
+	_first_shot_done = false
+	for e in system.events:
+		var who := str(e.get("who", "narr"))
+		if who == "player" or who == "opp":
+			_first_shooter = who
+			break
+	if _first_shooter == "":
+		return
+	var player_first := _first_shooter == "player"
+	(_fp if player_first else _fo).play("quick")
+	(_fo if player_first else _fp).play("draw")
+
+
+func _end_poses() -> void:
+	if _fp == null:
+		return
+	for f in [_fp, _fo]:
+		var fighter: DuelFighter = f
+		if not fighter.down and (fighter.anim == "draw" or fighter.anim == "shoot" or fighter.anim == "quick"):
+			fighter.play("holster")
+
+
+## Effetti dell'evento di scambio: sparo, ferita, caduta.
+func _event_fx(who: String, kind: String) -> void:
+	if _fp == null or (who != "player" and who != "opp"):
+		return
+	var s := _sprite_scale()
+	var side := 0 if who == "player" else 1
+	var me := _fp if side == 0 else _fo
+	var foe := _fo if side == 0 else _fp
+	if kind == "down":
+		me.fall()
+		_burst(_fpos(side) + Vector2(0.0, -4.0), 9, Color(0.85, 0.70, 0.50, 0.8), 70.0, false)
+		return
+	var face := 1 if side == 0 else -1
+	var mz := me.muzzle(_fpos(side), face, s)
+	if _first_shot_done or who != _first_shooter:
+		me.play("shoot")
+	_first_shot_done = true
+	var target := foe.chest(_fpos(1 - side), s)
+	if kind == "hit":
+		foe.hit()
+		_tracers.append({"a": mz, "b": target, "t": 0.14})
+		_burst(target, 8, Color(0.75, 0.15, 0.10, 0.9), 100.0, false)
+	else:
+		var away := target + Vector2(float(face) * 280.0, randf_range(-40.0, 30.0))
+		_tracers.append({"a": mz, "b": away, "t": 0.14})
+		_burst(Vector2(away.x, _fpos(1 - side).y), 6, Color(0.85, 0.70, 0.50, 0.8), 80.0, false)
+	_burst(mz, 5, Color(0.9, 0.9, 0.9, 0.7), 30.0, true)
+
+
+func _burst(pos: Vector2, n: int, col: Color, speed: float, smoke: bool) -> void:
+	for i in n:
+		var a := randf() * TAU
+		var v := Vector2(cos(a), sin(a) * 0.6) * speed * randf_range(0.3, 1.0)
+		if smoke:
+			v = Vector2(randf_range(-10.0, 10.0), randf_range(-35.0, -15.0))
+		_parts.append({
+			"p": pos, "v": v, "t": 0.0, "c": col, "smoke": smoke,
+			"life": randf_range(0.6, 1.2) if smoke else randf_range(0.3, 0.7),
+			"r": randf_range(3.0, 7.0) if smoke else randf_range(2.0, 4.0),
+		})
+
+
+func _update_fx(delta: float) -> void:
+	for i in range(_parts.size() - 1, -1, -1):
+		var p: Dictionary = _parts[i]
+		p["t"] = float(p["t"]) + delta
+		p["p"] = Vector2(p["p"]) + Vector2(p["v"]) * delta
+		p["v"] = Vector2(p["v"]) * (1.0 - minf(1.0, delta * 2.0))
+		if float(p["t"]) >= float(p["life"]):
+			_parts.remove_at(i)
+	for i in range(_tracers.size() - 1, -1, -1):
+		_tracers[i]["t"] = float(_tracers[i]["t"]) - delta
+		if float(_tracers[i]["t"]) <= 0.0:
+			_tracers.remove_at(i)
+	if _stage == Stage.INTRO and _accepted and _walk_k() < 0.98:
+		_walk_dust -= delta
+		if _walk_dust <= 0.0:
+			_walk_dust = 0.12
+			for side in 2:
+				_burst(_fpos(side) + Vector2(0.0, -2.0), 2, Color(0.85, 0.72, 0.50, 0.6), 30.0, false)
+
+
+func _draw_fighters(off: Vector2) -> void:
+	var s := _sprite_scale()
+	_fo.draw(self, _fpos(1) + off, -1, s, Color(1.0, 0.74, 0.64))
+	_fp.draw(self, _fpos(0) + off, 1, s, Color.WHITE)
+	# Bagliore alla bocca della canna.
+	var glows := [[_fp, 0, 1, _flash_p], [_fo, 1, -1, _flash_o]]
+	for g in glows:
+		if float(g[3]) > 0.0:
+			var fighter: DuelFighter = g[0]
+			var mz := fighter.muzzle(_fpos(int(g[1])) + off, int(g[2]), s)
+			draw_circle(mz, (6.0 + 3.0 * s) * float(g[3]), Color(1.0, 0.85, 0.30, 0.45 * float(g[3])))
+	for t in _tracers:
+		var a := float(t["t"]) / 0.14
+		draw_line(Vector2(t["a"]) + off, Vector2(t["b"]) + off, Color(1.0, 0.92, 0.55, a), 4.0)
+		draw_line(Vector2(t["a"]) + off, Vector2(t["b"]) + off, Color(1.0, 1.0, 1.0, a), 1.5)
+	for p in _parts:
+		var k := float(p["t"]) / float(p["life"])
+		var col: Color = p["c"]
+		col.a *= 1.0 - k
+		var r := float(p["r"]) * (1.0 + (k * 1.5 if bool(p["smoke"]) else 0.0))
+		draw_circle(Vector2(p["p"]) + off, r, col)
+
+
+func _draw_audience_sprites(w: float, gy: float) -> void:
+	var n := mini(system.audience, int(DuelDB.section("audience").get("max_drawn", 16)))
+	var s := maxf(2.0, _sprite_scale() - 2.0)
+	for i in n:
+		var side := i % 2
+		var row := i / 2
+		var x := w * (0.035 + 0.034 * float(row)) if side == 0 else w * (0.965 - 0.034 * float(row))
+		var y := gy + 14.0 + float(row % 3) * 10.0
+		var tone := 0.55 + 0.06 * float((i * 7) % 5)
+		var face := 1 if side == 0 else -1
+		_aud.draw_still(self, "idle", int(_clock * 6.0 + float(i) * 2.3), Vector2(x, y), face, s, Color(tone, tone * 0.92, tone * 0.85))
+		if system.sheriff_present and i == 0:
+			draw_circle(Vector2(x, y - 24.0 * s), 1.6 * s, Color(0.95, 0.80, 0.20))
+
+
+func _draw_backdrop(w: float, gy: float) -> void:
+	if _fp == null:
+		return
+	# Nuvole lente.
+	for i in 3:
+		var cx := fmod(w * (0.15 + 0.33 * float(i)) + _clock * (6.0 + 3.0 * float(i)), w + 300.0) - 150.0
+		var cy := 64.0 + 40.0 * float(i)
+		for j in 4:
+			draw_circle(Vector2(cx + float(j) * 26.0, cy + float(j % 2) * 6.0), 18.0 - float(j % 3) * 3.0, Color(1.0, 0.98, 0.90, 0.35))
+	# Mesa lontane.
+	_mesa(w * 0.18, w * 0.40, 54.0, gy - 6.0, Color(0.74, 0.55, 0.40))
+	_mesa(w * 0.55, w * 0.84, 78.0, gy - 6.0, Color(0.80, 0.62, 0.46))
+
+
+func _mesa(x0: float, x1: float, h: float, base: float, col: Color) -> void:
+	var d := x1 - x0
+	draw_colored_polygon(PackedVector2Array([
+		Vector2(x0, base), Vector2(x0 + d * 0.08, base - h * 0.7), Vector2(x0 + d * 0.14, base - h),
+		Vector2(x1 - d * 0.18, base - h), Vector2(x1 - d * 0.08, base - h * 0.8), Vector2(x1, base)
+	]), col)
+	draw_rect(Rect2(x0 + d * 0.14, base - h, d * 0.68, 5.0), col.lightened(0.12))
+
+
+func _draw_town(w: float, gy: float) -> void:
+	var font := get_theme_default_font()
+	var bw := w * 0.21
+	var signs := ["SALOON", "BANCA"]
+	for side in 2:
+		var x0 := 0.0 if side == 0 else w - bw
+		var wall := WOOD.lerp(Color(0.62, 0.42, 0.24), 0.35 if side == 0 else 0.15)
+		# Corpo, falso frontone e cornicione.
+		draw_rect(Rect2(x0, gy - 175.0, bw, 185.0), wall)
+		draw_rect(Rect2(x0, gy - 224.0, bw, 52.0), wall.lightened(0.06))
+		draw_rect(Rect2(x0 - 4.0, gy - 230.0, bw + 8.0, 8.0), WOOD_DARK)
+		for i in int(bw / 16.0):
+			draw_line(Vector2(x0 + 8.0 + float(i) * 16.0, gy - 222.0), Vector2(x0 + 8.0 + float(i) * 16.0, gy + 10.0), Color(WOOD_DARK, 0.35), 2.0)
+		# Insegna.
+		var sr := Rect2(x0 + bw * 0.10, gy - 216.0, bw * 0.80, 36.0)
+		draw_rect(sr.grow(3.0), WOOD_DARK)
+		draw_rect(sr, Color(0.88, 0.74, 0.46))
+		draw_string(font, Vector2(sr.position.x, sr.position.y + 26.0), signs[side], HORIZONTAL_ALIGNMENT_CENTER, sr.size.x, 22, INK)
+		# Finestre con riflesso.
+		for i in 2:
+			var wr := Rect2(x0 + 18.0 + float(i) * bw * 0.44, gy - 146.0, bw * 0.30, 56.0)
+			draw_rect(wr.grow(4.0), WOOD_DARK)
+			draw_rect(wr, Color(0.16, 0.12, 0.09))
+			draw_colored_polygon(PackedVector2Array([
+				wr.position + Vector2(6, 0), wr.position + Vector2(20, 0),
+				wr.position + Vector2(4, wr.size.y), wr.position + Vector2(0, wr.size.y)
+			]), Color(1.0, 0.95, 0.80, 0.16))
+			draw_line(Vector2(wr.position.x + wr.size.x * 0.5, wr.position.y), Vector2(wr.position.x + wr.size.x * 0.5, wr.end.y), WOOD_DARK, 3.0)
+		# Portico: ombra, tettoia, pali.
+		draw_rect(Rect2(x0, gy - 62.0, bw, 70.0), Color(0.0, 0.0, 0.0, 0.18))
+		draw_rect(Rect2(x0 - (0.0 if side == 0 else 22.0), gy - 70.0, bw + 22.0, 9.0), WOOD_DARK)
+		for i in 3:
+			draw_rect(Rect2(x0 + 14.0 + float(i) * (bw - 40.0) * 0.5, gy - 61.0, 8.0, 68.0), WOOD_DARK)
+		# Staccionata per i cavalli e botte.
+		var rx := x0 + bw - 105.0 if side == 0 else x0 + 15.0
+		draw_rect(Rect2(rx, gy - 16.0, 90.0, 6.0), WOOD_DARK)
+		draw_rect(Rect2(rx + 4.0, gy - 16.0, 6.0, 26.0), WOOD_DARK)
+		draw_rect(Rect2(rx + 80.0, gy - 16.0, 6.0, 26.0), WOOD_DARK)
+		var bx := x0 + bw * 0.06 if side == 0 else x0 + bw * 0.94 - 26.0
+		draw_rect(Rect2(bx, gy - 30.0, 26.0, 38.0), WOOD)
+		draw_rect(Rect2(bx - 1.0, gy - 22.0, 28.0, 3.0), WOOD_DARK)
+		draw_rect(Rect2(bx - 1.0, gy - 6.0, 28.0, 3.0), WOOD_DARK)
+	# Erba rotolante mentre cala la tensione.
+	if _stage >= Stage.INTRO and _stage <= Stage.CUE:
+		var tp := Vector2(fmod(_clock * 70.0, w + 160.0) - 80.0, gy + 84.0 - absf(sin(_clock * 3.2)) * 22.0)
+		draw_arc(tp, 13.0, 0.0, TAU, 16, Color(0.45, 0.32, 0.18), 2.0)
+		for k in 4:
+			var a := _clock * 5.0 + float(k) * PI * 0.5
+			draw_line(tp - Vector2(cos(a), sin(a)) * 12.0, tp + Vector2(cos(a), sin(a)) * 12.0, Color(0.45, 0.32, 0.18), 1.5)
